@@ -14,6 +14,7 @@ func TranslateMultiLines(lines []string, from, to string) []string {
 	count, last := 0, 0
 	sep := fmt.Sprintf("\n")
 	for k, v := range lines {
+		count += len(v)
 		if count+len(v) > 4500 || k == len(lines)-1 {
 			merged := strings.Join(lines[last:k+1], sep)
 			ret, err := Translate(merged, from, to)
@@ -24,8 +25,8 @@ func TranslateMultiLines(lines []string, from, to string) []string {
 			for i := 0; i < k-last+1; i++ {
 				translated[last+i] = translatedLines[i]
 			}
-			count += len(v)
 			last = k
+			count = 0
 		}
 	}
 	return translated
