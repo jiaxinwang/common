@@ -16,14 +16,11 @@ func TranslateMultiLines(lines []string, from, to string) []string {
 	for k, v := range lines {
 		if count+len(v) > 4500 || k == len(lines)-1 {
 			merged := strings.Join(lines[last:k+1], sep)
-			logrus.WithField("merged", merged).Info()
 			ret, err := Translate(merged, from, to)
 			if err != nil {
 				logrus.WithError(err).Error()
 			}
-			logrus.WithField("ret", ret).Info()
 			translatedLines := strings.Split(ret, sep)
-			logrus.WithField("translatedLines", translatedLines).Info()
 			for i := 0; i < k-last+1; i++ {
 				translated[last+i] = translatedLines[i]
 			}
