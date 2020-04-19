@@ -15,6 +15,12 @@ func FileExist(name string) bool {
 	return true
 }
 
+// IsDir ...
+func IsDir(name string) bool {
+	info, err := os.Stat(name)
+	return err == nil && info.IsDir()
+}
+
 // Readlines ...
 func Readlines(file string) (lines []string, err error) {
 	fd, err := os.Open(file)
