@@ -13,6 +13,9 @@ func Lazy(params map[string]interface{}) (eq, gt, lt, gte, lte map[string]interf
 	lte = make(map[string]interface{})
 
 	for k, v := range params {
+		if v == nil {
+			continue
+		}
 		name := k
 		dest := &eq
 		switch {
