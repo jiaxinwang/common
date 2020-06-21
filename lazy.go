@@ -16,6 +16,12 @@ func Lazy(params map[string]interface{}) (eq, gt, lt, gteq, lteq map[string]inte
 		name := k
 		dest := &eq
 		switch {
+		case strings.EqualFold(k, "size"):
+			fallthrough
+		case strings.EqualFold(k, "offset"):
+			fallthrough
+		case strings.EqualFold(k, "page"):
+			dest = nil
 		case strings.HasSuffix(k, `_gt`):
 			name = strings.TrimSuffix(k, `_gt`)
 			dest = &gt
@@ -29,8 +35,9 @@ func Lazy(params map[string]interface{}) (eq, gt, lt, gteq, lteq map[string]inte
 			name = strings.TrimSuffix(k, `_lteq`)
 			dest = &lteq
 		}
-		(*dest)[name] = v
+		if dest != nil {
+			(*dest)[name] = v
+		}
 	}
-
 	return
 }
