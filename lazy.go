@@ -1,8 +1,26 @@
 package common
 
 import (
+	"reflect"
 	"strings"
 )
+
+// LazyTag ...
+func LazyTag(v interface{}, m map[string]interface{}) map[string]interface{} {
+	ret := make(map[string]interface{})
+	val := reflect.ValueOf(v).Elem()
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		tag := field.Tag
+		if t := tag.Get(`lazy`); t != `` {
+			if v, ok := m[field.Name]; ok {
+				ret[t] = v
+			}
+		}
+	}
+	return ret
+}
 
 // Lazy ...
 func Lazy(params map[string]interface{}) (eq, gt, lt, gte, lte map[string]interface{}) {

@@ -63,3 +63,31 @@ func TestLazy(t *testing.T) {
 		})
 	}
 }
+
+func TestLazyTag(t *testing.T) {
+	testStruct := struct {
+		Name string `lazy:"name"`
+	}{}
+	type args struct {
+		v interface{}
+		m map[string]interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]interface{}
+	}{
+		{
+			"simple",
+			args{&testStruct, map[string]interface{}{"Name": "tom"}},
+			map[string]interface{}{"name": "tom"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := LazyTag(tt.args.v, tt.args.m); !cmp.Equal(got, tt.want) {
+				t.Errorf("LazyTag() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
+			}
+		})
+	}
+}
