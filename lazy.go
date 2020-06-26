@@ -7,6 +7,77 @@ import (
 	"strings"
 )
 
+// LazyParse ...
+func LazyParse(v string, k reflect.Kind) (ret interface{}) {
+	switch k {
+	case reflect.Uint:
+		if kv, err := strconv.ParseUint(v, 10, 64); err == nil {
+			ret = uint(kv)
+		}
+	case reflect.Uint64:
+		if kv, err := strconv.ParseUint(v, 10, 64); err == nil {
+			ret = uint64(kv)
+		}
+	case reflect.Uint32:
+		if kv, err := strconv.ParseUint(v, 10, 32); err == nil {
+			ret = uint32(kv)
+		}
+	case reflect.Uint16:
+		if kv, err := strconv.ParseUint(v, 10, 16); err == nil {
+			ret = uint16(kv)
+		}
+	case reflect.Uint8:
+		if kv, err := strconv.ParseUint(v, 10, 8); err == nil {
+			ret = uint8(kv)
+		}
+	case reflect.Int:
+		if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
+			ret = int(kv)
+		}
+	case reflect.Int64:
+		if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
+			ret = int64(kv)
+		}
+	case reflect.Int32:
+		if kv, err := strconv.ParseInt(v, 10, 32); err == nil {
+			ret = int32(kv)
+		}
+	case reflect.Int16:
+		if kv, err := strconv.ParseInt(v, 10, 16); err == nil {
+			ret = int16(kv)
+		}
+	case reflect.Int8:
+		if kv, err := strconv.ParseInt(v, 10, 8); err == nil {
+			ret = int8(kv)
+		}
+	case reflect.String:
+		ret = v
+	default:
+		fmt.Print("unsupported kind")
+	}
+	return
+}
+
+// LazyTagSlice ...
+func LazyTagSlice(v interface{}, m map[string][]string) map[string][]interface{} {
+	ret := make(map[string][]interface{})
+	val := reflect.ValueOf(v).Elem()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		tag := field.Tag
+		if t := tag.Get(`lazy`); t != `` {
+			if vv, ok := m[t]; ok {
+				ret[t] = make([]interface{}, 0)
+				for _, vvv := range vv {
+					ret[t] = append(ret[t], LazyParse(vvv, field.Type.Kind()))
+				}
+			}
+		}
+	}
+
+	return ret
+}
+
 // LazyTag ...
 func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
 	ret := make(map[string]interface{})
@@ -16,52 +87,7 @@ func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
 		tag := field.Tag
 		if t := tag.Get(`lazy`); t != `` {
 			if v, ok := m[t]; ok {
-				switch field.Type.Kind() {
-				case reflect.Uint:
-					if kv, err := strconv.ParseUint(v, 10, 64); err == nil {
-						ret[t] = uint(kv)
-					}
-				case reflect.Uint64:
-					if kv, err := strconv.ParseUint(v, 10, 64); err == nil {
-						ret[t] = uint64(kv)
-					}
-				case reflect.Uint32:
-					if kv, err := strconv.ParseUint(v, 10, 32); err == nil {
-						ret[t] = uint32(kv)
-					}
-				case reflect.Uint16:
-					if kv, err := strconv.ParseUint(v, 10, 16); err == nil {
-						ret[t] = uint16(kv)
-					}
-				case reflect.Uint8:
-					if kv, err := strconv.ParseUint(v, 10, 8); err == nil {
-						ret[t] = uint8(kv)
-					}
-				case reflect.Int:
-					if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
-						ret[t] = int(kv)
-					}
-				case reflect.Int64:
-					if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
-						ret[t] = int64(kv)
-					}
-				case reflect.Int32:
-					if kv, err := strconv.ParseInt(v, 10, 32); err == nil {
-						ret[t] = int32(kv)
-					}
-				case reflect.Int16:
-					if kv, err := strconv.ParseInt(v, 10, 16); err == nil {
-						ret[t] = int16(kv)
-					}
-				case reflect.Int8:
-					if kv, err := strconv.ParseInt(v, 10, 8); err == nil {
-						ret[t] = int8(kv)
-					}
-				case reflect.String:
-					ret[t] = v
-				default:
-					fmt.Print("unsupported kind")
-				}
+				ret[t] = LazyParse(v, field.Type.Kind())
 			}
 		}
 	}
