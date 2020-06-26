@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -16,13 +17,33 @@ func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
 		if t := tag.Get(`lazy`); t != `` {
 			if v, ok := m[t]; ok {
 				switch field.Type.Kind() {
+				case reflect.Uint:
+					if kv, err := strconv.ParseUint(v, 10, 64); err == nil {
+						ret[t] = uint(kv)
+					}
+				case reflect.Uint64:
+					if kv, err := strconv.ParseUint(v, 10, 64); err == nil {
+						ret[t] = uint64(kv)
+					}
+				case reflect.Uint32:
+					if kv, err := strconv.ParseUint(v, 10, 32); err == nil {
+						ret[t] = uint32(kv)
+					}
+				case reflect.Uint16:
+					if kv, err := strconv.ParseUint(v, 10, 16); err == nil {
+						ret[t] = uint16(kv)
+					}
+				case reflect.Uint8:
+					if kv, err := strconv.ParseUint(v, 10, 8); err == nil {
+						ret[t] = uint8(kv)
+					}
 				case reflect.Int:
 					if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
 						ret[t] = int(kv)
 					}
 				case reflect.Int64:
 					if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
-						ret[t] = int(kv)
+						ret[t] = int64(kv)
 					}
 				case reflect.Int32:
 					if kv, err := strconv.ParseInt(v, 10, 32); err == nil {
@@ -39,7 +60,7 @@ func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
 				case reflect.String:
 					ret[t] = v
 				default:
-					panic("unsupported kind")
+					fmt.Print("unsupported kind")
 				}
 			}
 		}
