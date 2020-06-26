@@ -2,44 +2,42 @@ package common
 
 import (
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestLazy(t *testing.T) {
 	type args struct {
-		params map[string][]interface{}
+		params map[string][]string
 	}
-	pt, _ := time.Parse("2006-01-02", "2000-01-01")
 	tests := []struct {
 		name     string
 		args     args
-		wantEq   map[string][]interface{}
-		wantGt   map[string]interface{}
-		wantLt   map[string]interface{}
-		wantGteq map[string]interface{}
-		wantLteq map[string]interface{}
+		wantEq   map[string][]string
+		wantGt   map[string]string
+		wantLt   map[string]string
+		wantGteq map[string]string
+		wantLteq map[string]string
 	}{
 		{
 			"empty",
 			args{
-				map[string][]interface{}{
-					"name":           []interface{}{"tom"},
-					"created_at_lte": []interface{}{pt},
-					"w_lt":           []interface{}{0.01},
-					"age_gt":         []interface{}{18},
-					"p_gte":          []interface{}{32},
-					"size":           []interface{}{12},
-					"page":           []interface{}{2},
-					"offset":         []interface{}{100},
+				map[string][]string{
+					"name":           []string{"tom"},
+					"created_at_lte": []string{"2000-01-01"},
+					"w_lt":           []string{"0.01"},
+					"age_gt":         []string{"18"},
+					"p_gte":          []string{"32"},
+					"size":           []string{"12"},
+					"page":           []string{"2"},
+					"offset":         []string{"100"},
 				},
 			},
-			map[string][]interface{}{"name": []interface{}{"tom"}},
-			map[string]interface{}{"age": 18},
-			map[string]interface{}{"w": 0.01},
-			map[string]interface{}{"p": 32},
-			map[string]interface{}{"created_at": pt},
+			map[string][]string{"name": []string{"tom"}},
+			map[string]string{"age": "18"},
+			map[string]string{"w": "0.01"},
+			map[string]string{"p": "32"},
+			map[string]string{"created_at": "2000-01-01"},
 		},
 	}
 	for _, tt := range tests {

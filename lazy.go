@@ -23,12 +23,12 @@ func LazyTag(v interface{}, m map[string]interface{}) map[string]interface{} {
 }
 
 // Lazy ...
-func Lazy(params map[string][]interface{}) (eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) {
-	eq = make(map[string][]interface{})
-	gt = make(map[string]interface{})
-	lt = make(map[string]interface{})
-	gte = make(map[string]interface{})
-	lte = make(map[string]interface{})
+func Lazy(params map[string][]string) (eq map[string][]string, gt, lt, gte, lte map[string]string) {
+	eq = make(map[string][]string)
+	gt = make(map[string]string)
+	lt = make(map[string]string)
+	gte = make(map[string]string)
+	lte = make(map[string]string)
 
 	for kk, vv := range params {
 		if vv == nil {
@@ -71,7 +71,7 @@ func Lazy(params map[string][]interface{}) (eq map[string][]interface{}, gt, lt,
 			}
 			if destM != nil {
 				if (*destM)[name] == nil {
-					(*destM)[name] = make([]interface{}, 0)
+					(*destM)[name] = make([]string, 0)
 				}
 				(*destM)[name] = append((*destM)[name], v)
 			}
