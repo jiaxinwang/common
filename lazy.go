@@ -23,56 +23,58 @@ func LazyTag(v interface{}, m map[string]interface{}) map[string]interface{} {
 }
 
 // Lazy ...
-func Lazy(params map[string]interface{}) (eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) {
+func Lazy(params map[string][]interface{}) (eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) {
 	eq = make(map[string][]interface{})
 	gt = make(map[string]interface{})
 	lt = make(map[string]interface{})
 	gte = make(map[string]interface{})
 	lte = make(map[string]interface{})
 
-	for k, v := range params {
-		if v == nil {
+	for kk, vv := range params {
+		if vv == nil {
 			continue
 		}
-		name := k
-		destM := &eq
-		destS := &gt
-		switch {
-		case strings.EqualFold(k, "size"):
-			fallthrough
-		case strings.EqualFold(k, "offset"):
-			fallthrough
-		case strings.EqualFold(k, "page"):
-			destM = nil
-			destS = nil
-		case strings.HasSuffix(k, `_gt`):
-			name = strings.TrimSuffix(k, `_gt`)
-			destM = nil
-			destS = &gt
-		case strings.HasSuffix(k, `_lt`):
-			name = strings.TrimSuffix(k, `_lt`)
-			destM = nil
-			destS = &lt
-		case strings.HasSuffix(k, `_gte`):
-			name = strings.TrimSuffix(k, `_gte`)
-			destM = nil
-			destS = &gte
-		case strings.HasSuffix(k, `_lte`):
-			name = strings.TrimSuffix(k, `_lte`)
-			destM = nil
-			destS = &lte
-		default:
-			destM = &eq
-			destS = nil
-		}
-		if destS != nil {
-			(*destS)[name] = v
-		}
-		if destM != nil {
-			if (*destM)[name] == nil {
-				(*destM)[name] = make([]interface{}, 0)
+		for _, v := range vv {
+			name := kk
+			destM := &eq
+			destS := &gt
+			switch {
+			case strings.EqualFold(kk, "size"):
+				fallthrough
+			case strings.EqualFold(kk, "offset"):
+				fallthrough
+			case strings.EqualFold(kk, "page"):
+				destM = nil
+				destS = nil
+			case strings.HasSuffix(kk, `_gt`):
+				name = strings.TrimSuffix(kk, `_gt`)
+				destM = nil
+				destS = &gt
+			case strings.HasSuffix(kk, `_lt`):
+				name = strings.TrimSuffix(kk, `_lt`)
+				destM = nil
+				destS = &lt
+			case strings.HasSuffix(kk, `_gte`):
+				name = strings.TrimSuffix(kk, `_gte`)
+				destM = nil
+				destS = &gte
+			case strings.HasSuffix(kk, `_lte`):
+				name = strings.TrimSuffix(kk, `_lte`)
+				destM = nil
+				destS = &lte
+			default:
+				destM = &eq
+				destS = nil
 			}
-			(*destM)[name] = append((*destM)[name], v)
+			if destS != nil {
+				(*destS)[name] = v
+			}
+			if destM != nil {
+				if (*destM)[name] == nil {
+					(*destM)[name] = make([]interface{}, 0)
+				}
+				(*destM)[name] = append((*destM)[name], v)
+			}
 		}
 	}
 	return

@@ -9,7 +9,7 @@ import (
 
 func TestLazy(t *testing.T) {
 	type args struct {
-		params map[string]interface{}
+		params map[string][]interface{}
 	}
 	pt, _ := time.Parse("2006-01-02", "2000-01-01")
 	tests := []struct {
@@ -24,15 +24,15 @@ func TestLazy(t *testing.T) {
 		{
 			"empty",
 			args{
-				map[string]interface{}{
-					"name":           "tom",
-					"created_at_lte": pt,
-					"w_lt":           0.01,
-					"age_gt":         18,
-					"p_gte":          32,
-					"size":           12,
-					"page":           2,
-					"offset":         100,
+				map[string][]interface{}{
+					"name":           []interface{}{"tom"},
+					"created_at_lte": []interface{}{pt},
+					"w_lt":           []interface{}{0.01},
+					"age_gt":         []interface{}{18},
+					"p_gte":          []interface{}{32},
+					"size":           []interface{}{12},
+					"page":           []interface{}{2},
+					"offset":         []interface{}{100},
 				},
 			},
 			map[string][]interface{}{"name": []interface{}{"tom"}},
