@@ -65,10 +65,11 @@ func TestLazy(t *testing.T) {
 func TestLazyTag(t *testing.T) {
 	testStruct := struct {
 		Name string `lazy:"name"`
+		Age  int    `lazy:"age"`
 	}{}
 	type args struct {
 		v interface{}
-		m map[string]interface{}
+		m map[string]string
 	}
 	tests := []struct {
 		name string
@@ -77,8 +78,8 @@ func TestLazyTag(t *testing.T) {
 	}{
 		{
 			"simple",
-			args{&testStruct, map[string]interface{}{"Name": "tom"}},
-			map[string]interface{}{"name": "tom"},
+			args{&testStruct, map[string]string{"name": "tom", "age": "18"}},
+			map[string]interface{}{"name": "tom", "age": 18},
 		},
 	}
 	for _, tt := range tests {

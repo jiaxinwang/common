@@ -2,20 +2,45 @@ package common
 
 import (
 	"reflect"
+	"strconv"
 	"strings"
 )
 
 // LazyTag ...
-func LazyTag(v interface{}, m map[string]interface{}) map[string]interface{} {
+func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
 	ret := make(map[string]interface{})
 	val := reflect.ValueOf(v).Elem()
-
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
 		tag := field.Tag
 		if t := tag.Get(`lazy`); t != `` {
-			if v, ok := m[field.Name]; ok {
-				ret[t] = v
+			if v, ok := m[t]; ok {
+				switch field.Type.Kind() {
+				case reflect.Int:
+					if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
+						ret[t] = int(kv)
+					}
+				case reflect.Int64:
+					if kv, err := strconv.ParseInt(v, 10, 64); err == nil {
+						ret[t] = int(kv)
+					}
+				case reflect.Int32:
+					if kv, err := strconv.ParseInt(v, 10, 32); err == nil {
+						ret[t] = int32(kv)
+					}
+				case reflect.Int16:
+					if kv, err := strconv.ParseInt(v, 10, 16); err == nil {
+						ret[t] = int16(kv)
+					}
+				case reflect.Int8:
+					if kv, err := strconv.ParseInt(v, 10, 8); err == nil {
+						ret[t] = int8(kv)
+					}
+				case reflect.String:
+					ret[t] = v
+				default:
+					panic("unsupported kind")
+				}
 			}
 		}
 	}
