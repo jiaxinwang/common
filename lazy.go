@@ -23,8 +23,8 @@ func LazyTag(v interface{}, m map[string]interface{}) map[string]interface{} {
 }
 
 // Lazy ...
-func Lazy(params map[string]interface{}) (eq, gt, lt, gte, lte map[string]interface{}) {
-	eq = make(map[string]interface{})
+func Lazy(params map[string]interface{}) (eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) {
+	eq = make(map[string][]interface{})
 	gt = make(map[string]interface{})
 	lt = make(map[string]interface{})
 	gte = make(map[string]interface{})
@@ -35,29 +35,44 @@ func Lazy(params map[string]interface{}) (eq, gt, lt, gte, lte map[string]interf
 			continue
 		}
 		name := k
-		dest := &eq
+		destM := &eq
+		destS := &gt
 		switch {
 		case strings.EqualFold(k, "size"):
 			fallthrough
 		case strings.EqualFold(k, "offset"):
 			fallthrough
 		case strings.EqualFold(k, "page"):
-			dest = nil
+			destM = nil
+			destS = nil
 		case strings.HasSuffix(k, `_gt`):
 			name = strings.TrimSuffix(k, `_gt`)
-			dest = &gt
+			destM = nil
+			destS = &gt
 		case strings.HasSuffix(k, `_lt`):
 			name = strings.TrimSuffix(k, `_lt`)
-			dest = &lt
+			destM = nil
+			destS = &lt
 		case strings.HasSuffix(k, `_gte`):
 			name = strings.TrimSuffix(k, `_gte`)
-			dest = &gte
+			destM = nil
+			destS = &gte
 		case strings.HasSuffix(k, `_lte`):
 			name = strings.TrimSuffix(k, `_lte`)
-			dest = &lte
+			destM = nil
+			destS = &lte
+		default:
+			destM = &eq
+			destS = nil
 		}
-		if dest != nil {
-			(*dest)[name] = v
+		if destS != nil {
+			(*destS)[name] = v
+		}
+		if destM != nil {
+			if (*destM)[name] == nil {
+				(*destM)[name] = make([]interface{}, 0)
+			}
+			(*destM)[name] = append((*destM)[name], v)
 		}
 	}
 	return

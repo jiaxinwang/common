@@ -15,7 +15,7 @@ func TestLazy(t *testing.T) {
 	tests := []struct {
 		name     string
 		args     args
-		wantEq   map[string]interface{}
+		wantEq   map[string][]interface{}
 		wantGt   map[string]interface{}
 		wantLt   map[string]interface{}
 		wantGteq map[string]interface{}
@@ -25,17 +25,17 @@ func TestLazy(t *testing.T) {
 			"empty",
 			args{
 				map[string]interface{}{
-					"name":            "tom",
-					"created_at_lteq": pt,
-					"w_lt":            0.01,
-					"age_gt":          18,
-					"p_gteq":          32,
-					"size":            12,
-					"page":            2,
-					"offset":          100,
+					"name":           "tom",
+					"created_at_lte": pt,
+					"w_lt":           0.01,
+					"age_gt":         18,
+					"p_gte":          32,
+					"size":           12,
+					"page":           2,
+					"offset":         100,
 				},
 			},
-			map[string]interface{}{"name": "tom"},
+			map[string][]interface{}{"name": []interface{}{"tom"}},
 			map[string]interface{}{"age": 18},
 			map[string]interface{}{"w": 0.01},
 			map[string]interface{}{"p": 32},
