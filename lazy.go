@@ -5,7 +5,22 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"encoding/json"
 )
+
+// LazyStructMap ...
+func LazyStructMap(v interface{}) (ret map[string]interface{}, err error) {
+	if b, err := json.Marshal(v); err != nil {
+		return nil, err
+	} else {
+		ret = make(map[string]interface{})
+		if err = json.Unmarshal(b, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	}
+}
 
 // LazyParse ...
 func LazyParse(v string, k reflect.Kind) (ret interface{}) {
