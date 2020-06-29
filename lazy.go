@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"encoding/json"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 // LazyStructMap ...
@@ -20,6 +22,15 @@ func LazyStructMap(v interface{}) (ret map[string]interface{}, err error) {
 		}
 		return ret, nil
 	}
+}
+
+// LazyMapStruct ...
+func LazyMapStruct(m map[string]interface{}, model interface{}) (v interface{}, err error) {
+	if err = mapstructure.Decode(m, &model); err != nil {
+		return nil, err
+	}
+	v = model
+	return v, err
 }
 
 // LazyParse ...
