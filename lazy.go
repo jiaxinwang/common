@@ -53,7 +53,8 @@ func toTimeHookFunc() mapstructure.DecodeHookFunc {
 // LazyMapStruct ...
 func LazyMapStruct(input map[string]interface{}, result interface{}) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: nil,
+		Metadata:         nil,
+		WeaklyTypedInput: true,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			toTimeHookFunc()),
 		Result: result,
@@ -257,7 +258,6 @@ func SelectBuilder(s sq.SelectBuilder, eq map[string][]interface{}, gt, lt, gte,
 
 // Query ...
 func Query(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, err error) {
-
 	ret = make([]map[string]interface{}, 0)
 	sql, args, err := active.ToSql()
 	if err != nil {
@@ -291,6 +291,20 @@ func Query(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, 
 			}
 			vType := reflect.TypeOf(val)
 			switch vType.String() {
+			case "uint8":
+				value[k] = val.(int8)
+			case "uint16":
+				value[k] = val.(int16)
+			case "uint32":
+				value[k] = val.(int32)
+			case "uint64":
+				value[k] = val.(int64)
+			case "int8":
+				value[k] = val.(int8)
+			case "int16":
+				value[k] = val.(int16)
+			case "int32":
+				value[k] = val.(int32)
 			case "int64":
 				value[k] = val.(int64)
 			case "bool":
