@@ -10,6 +10,8 @@ import (
 
 	"encoding/json"
 
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jinzhu/gorm"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -220,4 +222,102 @@ func LazyURLValues(s interface{}, q url.Values) (eqm map[string][]interface{}, g
 	gtem = LazyTag(s, gte)
 	ltem = LazyTag(s, lte)
 	return
+}
+
+// SelectBuilder ...
+func SelectBuilder(s sq.SelectBuilder, eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) sq.SelectBuilder {
+	for k, v := range eq {
+		switch {
+		case len(v) == 1:
+			eqs := sq.Eq{k: v[0]}
+			s = s.Where(eqs)
+		case len(v) > 1:
+			eqs := sq.Eq{k: v}
+			s = s.Where(eqs)
+		}
+	}
+	if len(gt) > 0 {
+		m := sq.Gt(gt)
+		s = s.Where(m)
+	}
+	if len(lt) > 0 {
+		m := sq.Lt(lt)
+		s = s.Where(m)
+	}
+	if len(gte) > 0 {
+		m := sq.GtOrEq(gte)
+		s = s.Where(m)
+	}
+	if len(lte) > 0 {
+		m := sq.LtOrEq(lte)
+		s = s.Where(m)
+	}
+	return s
+}
+
+// Query ...
+func Query(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, err error) {
+
+	ret = make([]map[string]interface{}, 0)
+	sql, args, err := active.ToSql()
+	if err != nil {
+		return ret, err
+	}
+
+	rows, sqlErr := db.Raw(sql, args...).Rows()
+
+	defer rows.Close()
+	if sqlErr != nil {
+		return ret, sqlErr
+	}
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return ret, err
+	}
+	length := len(columns)
+	for rows.Next() {
+		current := makeResultReceiver(length)
+		if err := rows.Scan(current...); err != nil {
+			panic(err)
+		}
+		value := make(map[string]interface{})
+		for i := 0; i < length; i++ {
+			k := columns[i]
+			val := *(current[i]).(*interface{})
+			if val == nil {
+				value[k] = nil
+				continue
+			}
+			vType := reflect.TypeOf(val)
+			switch vType.String() {
+			case "int64":
+				value[k] = val.(int64)
+			case "bool":
+				value[k] = val.(bool)
+			case "string":
+				value[k] = val.(string)
+			case "time.Time":
+				value[k] = val.(time.Time)
+			case "[]uint8":
+				value[k] = string(val.([]uint8))
+			default:
+				// logrus.Warnf("unsupport data type '%s' now\n", vType)
+			}
+		}
+		ret = append(ret, value)
+	}
+
+	return ret, nil
+
+}
+
+func makeResultReceiver(length int) []interface{} {
+	result := make([]interface{}, 0, length)
+	for i := 0; i < length; i++ {
+		var current interface{}
+		current = struct{}{}
+		result = append(result, &current)
+	}
+	return result
 }
