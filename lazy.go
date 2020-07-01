@@ -13,6 +13,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jinzhu/gorm"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 )
 
 // LazyStructMap ...
@@ -142,14 +143,46 @@ func LazyTagSlice(v interface{}, m map[string][]string) map[string][]interface{}
 
 // LazyTag ...
 func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
+	logrus.Print(m)
 	ret := make(map[string]interface{})
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
 		tag := field.Tag
 		if t := tag.Get(`lazy`); t != `` {
-			if v, ok := m[t]; ok {
-				ret[t] = LazyParse(v, field.Type.Kind())
+			if vv, ok := m[t]; ok {
+				name := field.Name
+				r := reflect.ValueOf(v)
+				f := reflect.Indirect(r).FieldByName(name)
+				fieldValue := f.Interface()
+				switch vvv := fieldValue.(type) {
+				case uint64:
+					i, _ := strconv.ParseUint(vv, 10, 64)
+					ret[t] = i
+				case uint32:
+					i, _ := strconv.ParseUint(vv, 10, 32)
+					ret[t] = i
+				case uint:
+					i, _ := strconv.ParseUint(vv, 10, 64)
+					ret[t] = int(i)
+				case int64:
+					i, _ := strconv.ParseInt(vv, 10, 64)
+					ret[t] = i
+				case int32:
+					i, _ := strconv.ParseInt(vv, 10, 32)
+					ret[t] = i
+				case int:
+					i, _ := strconv.ParseInt(vv, 10, 64)
+					ret[t] = int(i)
+				case string:
+					ret[t] = vv
+				case bool:
+					ret[t], _ = strconv.ParseBool(vv)
+				case time.Time:
+					ret[t], _ = time.Parse(time.RFC3339, vv)
+				default:
+					_ = vvv
+				}
 			}
 		}
 	}
