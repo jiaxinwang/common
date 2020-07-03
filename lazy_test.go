@@ -62,31 +62,31 @@ func TestLazy(t *testing.T) {
 	}
 }
 
-func TestLazyTag(t *testing.T) {
-	testStruct := struct {
-		Name string `lazy:"name"`
-		Age  int    `lazy:"age"`
-	}{}
-	type args struct {
-		v interface{}
-		m map[string]string
-	}
-	tests := []struct {
-		name string
-		args args
-		want map[string]interface{}
-	}{
-		{
-			"simple",
-			args{&testStruct, map[string]string{"name": "tom", "age": "18"}},
-			map[string]interface{}{"name": "tom", "age": 18},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := LazyTag(tt.args.v, tt.args.m); !cmp.Equal(got, tt.want) {
-				t.Errorf("LazyTag() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
-			}
-		})
-	}
-}
+// func TestLazyTag(t *testing.T) {
+// 	testStruct := struct {
+// 		Name string `lazy:"name"`
+// 		Age  int    `lazy:"age"`
+// 	}{}
+// 	type args struct {
+// 		v interface{}
+// 		m map[string]string
+// 	}
+// 	tests := []struct {
+// 		name string
+// 		args args
+// 		want map[string]interface{}
+// 	}{
+// 		{
+// 			"simple",
+// 			args{&testStruct, map[string]string{"name": "tom", "age": "18"}},
+// 			map[string]interface{}{"name": "tom", "age": 18},
+// 		},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			if got := LazyTag(tt.args.v, tt.args.m); !cmp.Equal(got, tt.want) {
+// 				t.Errorf("LazyTag() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
+// 			}
+// 		})
+// 	}
+// }

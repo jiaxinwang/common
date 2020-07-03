@@ -2,10 +2,73 @@ package common
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
+
+	"encoding/json"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jinzhu/gorm"
+	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 )
+
+// LazyStructMap ...
+func LazyStructMap(v interface{}) (ret map[string]interface{}, err error) {
+	if b, err := json.Marshal(v); err != nil {
+		return nil, err
+	} else {
+		ret = make(map[string]interface{})
+		if err = json.Unmarshal(b, &ret); err != nil {
+			return nil, err
+		}
+		return ret, nil
+	}
+}
+
+func toTimeHookFunc() mapstructure.DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{}) (interface{}, error) {
+		if t != reflect.TypeOf(time.Time{}) {
+			return data, nil
+		}
+
+		switch f.Kind() {
+		case reflect.String:
+			return time.Parse(time.RFC3339, data.(string))
+		case reflect.Float64:
+			return time.Unix(0, int64(data.(float64))*int64(time.Millisecond)), nil
+		case reflect.Int64:
+			return time.Unix(0, data.(int64)*int64(time.Millisecond)), nil
+		default:
+			return data, nil
+		}
+	}
+}
+
+// LazyMapStruct ...
+func LazyMapStruct(input map[string]interface{}, result interface{}) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata:         nil,
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			toTimeHookFunc()),
+		Result: result,
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := decoder.Decode(input); err != nil {
+		return err
+	}
+	return err
+}
 
 // LazyParse ...
 func LazyParse(v string, k reflect.Kind) (ret interface{}) {
@@ -84,14 +147,46 @@ func LazyTagSlice(v interface{}, m map[string][]string) map[string][]interface{}
 
 // LazyTag ...
 func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
+	logrus.Print(m)
 	ret := make(map[string]interface{})
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
 		tag := field.Tag
 		if t := tag.Get(`lazy`); t != `` {
-			if v, ok := m[t]; ok {
-				ret[t] = LazyParse(v, field.Type.Kind())
+			if vv, ok := m[t]; ok {
+				name := field.Name
+				r := reflect.ValueOf(v)
+				f := reflect.Indirect(r).FieldByName(name)
+				fieldValue := f.Interface()
+				switch vvv := fieldValue.(type) {
+				case uint64:
+					i, _ := strconv.ParseUint(vv, 10, 64)
+					ret[t] = i
+				case uint32:
+					i, _ := strconv.ParseUint(vv, 10, 32)
+					ret[t] = i
+				case uint:
+					i, _ := strconv.ParseUint(vv, 10, 64)
+					ret[t] = int(i)
+				case int64:
+					i, _ := strconv.ParseInt(vv, 10, 64)
+					ret[t] = i
+				case int32:
+					i, _ := strconv.ParseInt(vv, 10, 32)
+					ret[t] = i
+				case int:
+					i, _ := strconv.ParseInt(vv, 10, 64)
+					ret[t] = int(i)
+				case string:
+					ret[t] = vv
+				case bool:
+					ret[t], _ = strconv.ParseBool(vv)
+				case time.Time:
+					ret[t], _ = time.Parse(time.RFC3339, vv)
+				default:
+					_ = vvv
+				}
 			}
 		}
 	}
@@ -154,4 +249,126 @@ func Lazy(params map[string][]string) (eq map[string][]string, gt, lt, gte, lte 
 		}
 	}
 	return
+}
+
+// LazyURLValues ...
+func LazyURLValues(s interface{}, q url.Values) (eqm map[string][]interface{}, gtm, ltm, gtem, ltem map[string]interface{}) {
+	eq, gt, lt, gte, lte := Lazy(q)
+	eqm = LazyTagSlice(s, eq)
+	gtm = LazyTag(s, gt)
+	ltm = LazyTag(s, lt)
+	gtem = LazyTag(s, gte)
+	ltem = LazyTag(s, lte)
+	return
+}
+
+// SelectBuilder ...
+func SelectBuilder(s sq.SelectBuilder, eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) sq.SelectBuilder {
+	for k, v := range eq {
+		switch {
+		case len(v) == 1:
+			eqs := sq.Eq{k: v[0]}
+			s = s.Where(eqs)
+		case len(v) > 1:
+			eqs := sq.Eq{k: v}
+			s = s.Where(eqs)
+		}
+	}
+	if len(gt) > 0 {
+		m := sq.Gt(gt)
+		s = s.Where(m)
+	}
+	if len(lt) > 0 {
+		m := sq.Lt(lt)
+		s = s.Where(m)
+	}
+	if len(gte) > 0 {
+		m := sq.GtOrEq(gte)
+		s = s.Where(m)
+	}
+	if len(lte) > 0 {
+		m := sq.LtOrEq(lte)
+		s = s.Where(m)
+	}
+	return s
+}
+
+// Query ...
+func Query(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, err error) {
+	ret = make([]map[string]interface{}, 0)
+	sql, args, err := active.ToSql()
+	if err != nil {
+		return ret, err
+	}
+
+	rows, sqlErr := db.Raw(sql, args...).Rows()
+
+	defer rows.Close()
+	if sqlErr != nil {
+		return ret, sqlErr
+	}
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return ret, err
+	}
+	length := len(columns)
+	for rows.Next() {
+		current := makeResultReceiver(length)
+		if err := rows.Scan(current...); err != nil {
+			panic(err)
+		}
+		value := make(map[string]interface{})
+		for i := 0; i < length; i++ {
+			k := columns[i]
+			val := *(current[i]).(*interface{})
+			if val == nil {
+				value[k] = nil
+				continue
+			}
+			vType := reflect.TypeOf(val)
+			switch vType.String() {
+			case "uint8":
+				value[k] = val.(int8)
+			case "uint16":
+				value[k] = val.(int16)
+			case "uint32":
+				value[k] = val.(int32)
+			case "uint64":
+				value[k] = val.(int64)
+			case "int8":
+				value[k] = val.(int8)
+			case "int16":
+				value[k] = val.(int16)
+			case "int32":
+				value[k] = val.(int32)
+			case "int64":
+				value[k] = val.(int64)
+			case "bool":
+				value[k] = val.(bool)
+			case "string":
+				value[k] = val.(string)
+			case "time.Time":
+				value[k] = val.(time.Time)
+			case "[]uint8":
+				value[k] = string(val.([]uint8))
+			default:
+				// logrus.Warnf("unsupport data type '%s' now\n", vType)
+			}
+		}
+		ret = append(ret, value)
+	}
+
+	return ret, nil
+
+}
+
+func makeResultReceiver(length int) []interface{} {
+	result := make([]interface{}, 0, length)
+	for i := 0; i < length; i++ {
+		var current interface{}
+		current = struct{}{}
+		result = append(result, &current)
+	}
+	return result
 }
