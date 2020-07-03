@@ -52,6 +52,10 @@ func LazyParse(v string, k reflect.Kind) (ret interface{}) {
 		}
 	case reflect.String:
 		ret = v
+	case reflect.Bool:
+		if kv, err := strconv.ParseBool(v); err == nil {
+			ret = kv
+		}
 	default:
 		fmt.Print("unsupported kind")
 	}
