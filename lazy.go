@@ -312,7 +312,7 @@ func Query(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, 
 	for rows.Next() {
 		current := makeResultReceiver(length)
 		if err := rows.Scan(current...); err != nil {
-			panic(err)
+			return ret, err
 		}
 		value := make(map[string]interface{})
 		for i := 0; i < length; i++ {
