@@ -37,6 +37,10 @@ func LazyStructMap(src interface{}, timeLayout string) (ret map[string]interface
 			vofs := reflect.ValueOf(src)
 			for i := 0; i < vofs.NumField(); i++ {
 				switch vofs.Field(i).Interface().(type) {
+				case *time.Time:
+					t := vofs.Field(i).Interface().(*time.Time)
+					name := tofs.Field(i).Tag.Get(`lazy`)
+					ret[name] = t.Format(timeLayout)
 				case time.Time:
 					t := vofs.Field(i).Interface().(time.Time)
 					name := tofs.Field(i).Tag.Get(`lazy`)
