@@ -2,9 +2,15 @@ package common
 
 import (
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/sirupsen/logrus"
 )
+
+func init() {
+	logrus.SetReportCaller(true)
+}
 
 func TestLazy(t *testing.T) {
 	type args struct {
@@ -62,31 +68,39 @@ func TestLazy(t *testing.T) {
 	}
 }
 
-// func TestLazyTag(t *testing.T) {
-// 	testStruct := struct {
-// 		Name string `lazy:"name"`
-// 		Age  int    `lazy:"age"`
-// 	}{}
-// 	type args struct {
-// 		v interface{}
-// 		m map[string]string
-// 	}
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want map[string]interface{}
-// 	}{
-// 		{
-// 			"simple",
-// 			args{&testStruct, map[string]string{"name": "tom", "age": "18"}},
-// 			map[string]interface{}{"name": "tom", "age": 18},
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if got := LazyTag(tt.args.v, tt.args.m); !cmp.Equal(got, tt.want) {
-// 				t.Errorf("LazyTag() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
-// 			}
-// 		})
-// 	}
-// }
+func TestLazyStructMap(t *testing.T) {
+	type CustomTime struct {
+		Start time.Time `lazy:"Start"`
+	}
+
+	newT, _ := time.Parse("20060102", "20200101")
+	ct := CustomTime{Start: newT}
+
+	ret := map[string]interface{}{"Start": newT.Format("2006-01-02 15:04:05.000")}
+
+	type args struct {
+		src        interface{}
+		timeLayout string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantRet map[string]interface{}
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{"time", args{src: ct, timeLayout: "2006-01-02 15:04:05.000"}, ret, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotRet, err := LazyStructMap(tt.args.src, tt.args.timeLayout)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("LazyStructMap() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !cmp.Equal(gotRet, tt.wantRet) {
+				t.Errorf("LazyStructMap() = %v, want %v\ndiff=%v", gotRet, tt.wantRet, cmp.Diff(gotRet, tt.wantRet))
+			}
+		})
+	}
+}

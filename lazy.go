@@ -8,23 +8,44 @@ import (
 	"strings"
 	"time"
 
-	"encoding/json"
-
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jinzhu/gorm"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 )
 
+var json jsoniter.API
+
+func init() {
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
+}
+
 // LazyStructMap ...
-func LazyStructMap(v interface{}) (ret map[string]interface{}, err error) {
-	if b, err := json.Marshal(v); err != nil {
+func LazyStructMap(src interface{}, timeLayout string) (ret map[string]interface{}, err error) {
+	if b, err := json.Marshal(src); err != nil {
 		return nil, err
 	} else {
 		ret = make(map[string]interface{})
 		if err = json.Unmarshal(b, &ret); err != nil {
 			return nil, err
 		}
+
+		switch v := reflect.ValueOf(src); v.Kind() {
+		case reflect.Struct:
+			tofs := reflect.TypeOf(src)
+			vofs := reflect.ValueOf(src)
+			for i := 0; i < vofs.NumField(); i++ {
+				switch vofs.Field(i).Interface().(type) {
+				case time.Time:
+					t := vofs.Field(i).Interface().(time.Time)
+					name := tofs.Field(i).Tag.Get(`lazy`)
+					ret[name] = t.Format(timeLayout)
+				}
+			}
+		default:
+		}
+
 		return ret, nil
 	}
 }
