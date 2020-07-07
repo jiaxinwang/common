@@ -1,11 +1,5 @@
 package common
 
-import (
-	"testing"
-
-	"github.com/google/go-cmp/cmp"
-)
-
 var goodbyeMoonmenEN = []string{
 	"The worlds can be one together",
 	"Cosmos without hatred",
@@ -56,61 +50,61 @@ var goodbyeMoonmenCN = []string{
 	"闭嘴他妈的关于月满！",
 }
 
-func TestTranslateMultiLines(t *testing.T) {
-	type args struct {
-		lines []string
-		from  string
-		to    string
-	}
-	tests := []struct {
-		name string
-		args args
-		want []string
-	}{
-		{
-			"simple sentence",
-			args{[]string{"Goodbye moonmen"}, "en", "zh"},
-			[]string{"再见月亮人"},
-		},
-		{
-			"lyric slice",
-			args{goodbyeMoonmenEN, "en", "zh"},
-			goodbyeMoonmenCN,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := TranslateMultiLines(tt.args.lines, tt.args.from, tt.args.to); !cmp.Equal(got, tt.want) {
-				t.Errorf("TranslateMultiLines() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
-			}
-		})
-	}
-}
+// func TestTranslateMultiLines(t *testing.T) {
+// 	type args struct {
+// 		lines []string
+// 		from  string
+// 		to    string
+// 	}
+// 	tests := []struct {
+// 		name string
+// 		args args
+// 		want []string
+// 	}{
+// 		{
+// 			"simple sentence",
+// 			args{[]string{"Goodbye moonmen"}, "en", "zh"},
+// 			[]string{"再见月亮人"},
+// 		},
+// 		{
+// 			"lyric slice",
+// 			args{goodbyeMoonmenEN, "en", "zh"},
+// 			goodbyeMoonmenCN,
+// 		},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			if got := TranslateMultiLines(tt.args.lines, tt.args.from, tt.args.to); !cmp.Equal(got, tt.want) {
+// 				t.Errorf("TranslateMultiLines() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
+// 			}
+// 		})
+// 	}
+// }
 
-func TestTranslate(t *testing.T) {
-	type args struct {
-		line string
-		from string
-		to   string
-	}
-	tests := []struct {
-		name           string
-		args           args
-		wantTranslated string
-		wantErr        bool
-	}{
-		{"1 word", args{"space", "en", "zh"}, "空间", false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotTranslated, err := Translate(tt.args.line, tt.args.from, tt.args.to)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Translate() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotTranslated != tt.wantTranslated {
-				t.Errorf("Translate() = %v, want %v", gotTranslated, tt.wantTranslated)
-			}
-		})
-	}
-}
+// func TestTranslate(t *testing.T) {
+// 	type args struct {
+// 		line string
+// 		from string
+// 		to   string
+// 	}
+// 	tests := []struct {
+// 		name           string
+// 		args           args
+// 		wantTranslated string
+// 		wantErr        bool
+// 	}{
+// 		{"1 word", args{"space", "en", "zh"}, "空间", false},
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			gotTranslated, err := Translate(tt.args.line, tt.args.from, tt.args.to)
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("Translate() error = %v, wantErr %v", err, tt.wantErr)
+// 				return
+// 			}
+// 			if gotTranslated != tt.wantTranslated {
+// 				t.Errorf("Translate() = %v, want %v", gotTranslated, tt.wantTranslated)
+// 			}
+// 		})
+// 	}
+// }
