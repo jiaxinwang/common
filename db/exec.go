@@ -73,5 +73,5 @@ func ExecUpdate(db *gorm.DB, active sq.UpdateBuilder) (err error) {
 	if err != nil {
 		return err
 	}
-	return db.Exec(sql, args).Error
+	return db.Exec(sql, args...).Error
 }
