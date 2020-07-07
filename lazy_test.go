@@ -70,19 +70,24 @@ func TestLazy(t *testing.T) {
 
 func TestLazyStructMap(t *testing.T) {
 	type CustomTime struct {
-		Start time.Time  `lazy:"Start"`
-		End   *time.Time `lazy:"End"`
+		Start   time.Time  `lazy:"Start"`
+		End     *time.Time `lazy:"End"`
+		EndPtr0 *time.Time `lazy:"End_ptr_0"`
+		EndPtr1 *time.Time `json:"end_ptr_1,omitempty" lazy:"End_ptr_1"`
 	}
 
 	newT, _ := time.Parse("20060102", "20200101")
 	ct := CustomTime{
-		Start: newT,
-		End:   &newT,
+		Start:   newT,
+		End:     &newT,
+		EndPtr0: nil,
+		EndPtr1: nil,
 	}
 
 	ret := map[string]interface{}{
-		"Start": newT.Format("2006-01-02 15:04:05.000"),
-		"End":   newT.Format("2006-01-02 15:04:05.000"),
+		"Start":   newT.Format("2006-01-02 15:04:05.000"),
+		"End":     newT.Format("2006-01-02 15:04:05.000"),
+		"EndPtr0": nil,
 	}
 
 	type args struct {
