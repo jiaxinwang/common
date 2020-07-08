@@ -45,9 +45,9 @@ func route() *gin.Engine {
 		c.Set(
 			"ret",
 			map[string]interface{}{
-				"data":      int(10086),
-				"error_no":  0,
-				"error_msg": "",
+				"data": int(10086),
+				// "error_no":  0,
+				// "error_msg": "",
 			},
 		)
 		return
@@ -59,8 +59,8 @@ func route() *gin.Engine {
 				"data": struct {
 					Name string
 				}{Name: "monkey"},
-				"error_no":  0,
-				"error_msg": "",
+				// "error_no":  0,
+				// "error_msg": "",
 			},
 		)
 		return
@@ -102,7 +102,7 @@ func TestLazyResponse(t *testing.T) {
 	// w = httptest.NewRecorder()
 	// req, _ = http.NewRequest("GET", "/int", nil)
 	// router.ServeHTTP(w, req)
-	// want = Response{int(10086), ``, int(0), `xxx-xxx`}
+	// want = Response{int(10086), ``, int(0)}
 	// ret = Response{}
 	// err = json.Unmarshal(w.Body.Bytes(), &ret)
 	// assert.Equal(t, 200, w.Code)
