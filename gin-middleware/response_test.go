@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,32 +17,52 @@ func init() {
 
 func route() *gin.Engine {
 	r := gin.Default()
+	r.Use(Trace)
 	r.Use(LazyResponse)
 	r.GET("/client_err", func(c *gin.Context) {
-		err := errors.New("a client error")
-		c.Set("client_err", err)
-		c.Set("requestID", "xxx-xxx")
+		c.Set(
+			"ret",
+			map[string]interface{}{
+				"data":      nil,
+				"error_no":  0,
+				"error_msg": "a client error",
+			},
+		)
 		return
 	})
 	r.GET("/server_err", func(c *gin.Context) {
-		err := errors.New("a server error")
-		c.Set("server_err", err)
-		c.Set("requestID", "xxx-xxx")
+		c.Set(
+			"ret",
+			map[string]interface{}{
+				"data":      nil,
+				"error_no":  0,
+				"error_msg": "a server error",
+			},
+		)
 		return
 	})
 	r.GET("/int", func(c *gin.Context) {
-		c.Set("data", int(10086))
-		c.Set("requestID", "xxx-xxx")
+		c.Set(
+			"ret",
+			map[string]interface{}{
+				"data":      int(10086),
+				"error_no":  0,
+				"error_msg": "",
+			},
+		)
 		return
 	})
 	r.GET("/struct", func(c *gin.Context) {
 		c.Set(
-			"data",
-			struct {
-				Name string
-			}{Name: "monkey"},
+			"ret",
+			map[string]interface{}{
+				"data": struct {
+					Name string
+				}{Name: "monkey"},
+				"error_no":  0,
+				"error_msg": "",
+			},
 		)
-		c.Set("requestID", "xxx-xxx")
 		return
 	})
 
@@ -52,10 +71,10 @@ func route() *gin.Engine {
 
 func TestLazyResponse(t *testing.T) {
 	type Response struct {
-		Data      interface{} `json:"data"`
-		ErrorMsg  string      `json:"error_msg"`
-		ErrorNo   int         `json:"error_no"`
-		RequestID string      `json:"request_id"`
+		Data     interface{} `json:"data"`
+		ErrorMsg string      `json:"error_msg"`
+		ErrorNo  int         `json:"error_no"`
+		// RequestID string      `json:"request_id"`
 	}
 
 	router := route()
@@ -63,7 +82,7 @@ func TestLazyResponse(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/client_err", nil)
 	router.ServeHTTP(w, req)
-	want := Response{nil, `a client error`, int(0), `xxx-xxx`}
+	want := Response{nil, `a client error`, int(0)}
 	ret := Response{}
 	err := json.Unmarshal(w.Body.Bytes(), &ret)
 	assert.Equal(t, 200, w.Code)
@@ -73,7 +92,7 @@ func TestLazyResponse(t *testing.T) {
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", "/server_err", nil)
 	router.ServeHTTP(w, req)
-	want = Response{nil, `a server error`, int(0), `xxx-xxx`}
+	want = Response{nil, `a server error`, int(0)}
 	ret = Response{}
 	err = json.Unmarshal(w.Body.Bytes(), &ret)
 	assert.Equal(t, 200, w.Code)

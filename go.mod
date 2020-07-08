@@ -11,6 +11,7 @@ require (
 	github.com/json-iterator/go v1.1.10
 	github.com/mitchellh/mapstructure v1.3.2
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff // indirect
+	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/sys v0.0.0-20200620081246-981b61492c35 // indirect
