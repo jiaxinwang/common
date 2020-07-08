@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"net/url"
+
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // BeforeQueryAction ...
@@ -11,11 +14,24 @@ type BeforeQueryAction struct {
 	Result string
 }
 
+// BeforeAction ...
+type BeforeAction struct {
+	Table      string
+	Values     url.Values
+	TargetName string
+}
+
 // BeforeQuery ...
 func BeforeQuery(c *gin.Context) {
-	// inter, ok := c.Get("lazy_before_query")
-	// if !ok {
-	// 	return
-	// }
-	// logrus.Print(action)
+	// from (table,conditions)
+	// transfer
+	// to (param id)
+
+	// payload
+	if v, ok := c.Get("before_action"); ok {
+		payload := v.(BeforeAction)
+		logrus.Print(payload)
+	}
+
+	c.Next()
 }
