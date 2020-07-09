@@ -77,7 +77,7 @@ func TestLazyResponse(t *testing.T) {
 		// RequestID string      `json:"request_id"`
 	}
 
-	router := route()
+	router := beforeRoute()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/client_err", nil)

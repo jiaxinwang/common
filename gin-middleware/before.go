@@ -23,15 +23,9 @@ type BeforeAction struct {
 
 // BeforeQuery ...
 func BeforeQuery(c *gin.Context) {
-	// from (table,conditions)
-	// transfer
-	// to (param id)
-
-	// payload
 	if v, ok := c.Get("before_action"); ok {
 		payload := v.(BeforeAction)
 		logrus.Print(payload)
 	}
-
 	c.Next()
 }
