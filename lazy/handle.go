@@ -1,19 +1,26 @@
 package lazy
 
 import (
+	"errors"
 	"reflect"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
 	"github.com/jiaxinwang/common"
+	"github.com/sirupsen/logrus"
 )
 
-// Handle ...
+// Handle executes actions and returns response
 func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 	var config *Configuration
 	if v, ok := c.Get("lazy-configuration"); ok {
 		config = v.(*Configuration)
-		_, _, errBefore := config.BeforeAction(c, config.DB, *config, nil)
+	} else {
+		return nil, errors.New("can't find lazy-configuration")
+	}
+
+	if config.Before != nil {
+		_, _, errBefore := config.Before.Action(c, config.DB, *config, nil)
 		if errBefore != nil {
 			return nil, errBefore
 		}
@@ -37,16 +44,19 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 		merged = mergeValues(c.Request.URL.Query(), additional.(map[string][]string))
 	}
 
-	eq, gt, lt, gte, lte := LazyURLValues(config.Struct, merged)
+	eq, gt, lt, gte, lte := LazyURLValues(config.Model, merged)
 
 	sel := sq.Select(config.Columm).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
 	sel = common.SelectBuilder(sel, eq, gt, lt, gte, lte)
 	data, err = Query(config.DB, sel)
 
 	for _, v := range data {
-		MapStruct(v, config.Struct)
-		tmp := clone(config.Struct)
-		config.Targets = append(config.Targets, tmp)
+		if err := MapStruct(v, config.Model); err != nil {
+			return nil, err
+		}
+		logrus.WithField("v", v).WithField("model", config.Model).Info()
+		tmp := clone(config.Model)
+		config.Target = append(config.Target, tmp)
 	}
 	return
 }

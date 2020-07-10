@@ -17,6 +17,7 @@ import (
 	"github.com/jinzhu/gorm"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 )
 
 var json jsoniter.API
@@ -197,6 +198,7 @@ func toTimeHookFunc() mapstructure.DecodeHookFunc {
 
 		switch f.Kind() {
 		case reflect.String:
+			logrus.WithField("time raw", data.(string)).Info()
 			return time.Parse(time.RFC3339, data.(string))
 		case reflect.Float64:
 			return time.Unix(0, int64(data.(float64))*int64(time.Millisecond)), nil
@@ -594,20 +596,20 @@ func makeResultReceiver(length int) []interface{} {
 // DefaultBeforeAction ...
 func DefaultBeforeAction(c *gin.Context, gormDB *gorm.DB, config Configuration, payload interface{}) (result interface{}, reduce map[string][]string, err error) {
 	eq, gt, lt, gte, lte, r := BeforeLazy(c.Request.URL.Query())
-	eqm := LazyTagSlice(config.BeforeStruct, eq)
-	gtm := LazyTag(config.BeforeStruct, gt)
-	ltm := LazyTag(config.BeforeStruct, lt)
-	gtem := LazyTag(config.BeforeStruct, gte)
-	ltem := LazyTag(config.BeforeStruct, lte)
+	eqm := LazyTagSlice(config.Before.Model, eq)
+	gtm := LazyTag(config.Before.Model, gt)
+	ltm := LazyTag(config.Before.Model, lt)
+	gtem := LazyTag(config.Before.Model, gte)
+	ltem := LazyTag(config.Before.Model, lte)
 	gormDB.LogMode(true)
-	sel := db.SelectBuilder(sq.Select(config.BeforeColumm).From(config.BeforeTables), eqm, gtm, ltm, gtem, ltem)
+	sel := db.SelectBuilder(sq.Select(config.Before.Columms).From(config.Before.Table), eqm, gtm, ltm, gtem, ltem)
 	result, err = db.Query(gormDB, sel)
 	conv := result.([]map[string]interface{})
-	if queryName, ok := config.BeforeResultMap[config.BeforeColumm]; ok {
+	if queryName, ok := config.Before.ResultMap[config.Before.Columms]; ok {
 		m := make(map[string][]string)
 		for _, v := range conv {
 			for mk, mv := range v {
-				if strings.EqualFold(mk, config.BeforeColumm) {
+				if strings.EqualFold(mk, config.Before.Columms) {
 					if _, ok := m[queryName]; !ok {
 						m[queryName] = make([]string, 0)
 					}
