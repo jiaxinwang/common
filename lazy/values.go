@@ -513,8 +513,8 @@ func SelectBuilder(s sq.SelectBuilder, eq map[string][]interface{}, gt, lt, gte,
 	return s
 }
 
-// Query ...
-func Query(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, err error) {
+// SelectBuild ...
+func ExecSelect(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, err error) {
 	ret = make([]map[string]interface{}, 0)
 	sql, args, err := active.ToSql()
 	if err != nil {
