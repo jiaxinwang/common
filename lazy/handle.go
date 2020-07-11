@@ -2,11 +2,12 @@ package lazy
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
+	"strconv"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
-	"github.com/jiaxinwang/common"
 )
 
 // Handle executes actions and returns response
@@ -46,16 +47,40 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 	eq, gt, lt, gte, lte := LazyURLValues(config.Model, merged)
 
 	sel := sq.Select(config.Columm).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
-	sel = common.SelectBuilder(sel, eq, gt, lt, gte, lte)
-	data, err = Query(config.DB, sel)
+	sel = SelectBuilder(sel, eq, gt, lt, gte, lte)
+	data, err = ExecSelect(config.DB, sel)
+	if err != nil {
+		return
+	}
 
 	for _, v := range data {
 		if err := MapStruct(v, config.Model); err != nil {
 			return nil, err
 		}
 		tmp := clone(config.Model)
-		config.Target = append(config.Target, tmp)
+		config.Results = append(config.Results, tmp)
 	}
+
+	count := int64(len(data))
+
+	if config.NeedCount {
+		sel := sq.Select(`count(1) as c`).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
+		sel = SelectBuilder(sel, eq, gt, lt, gte, lte)
+		data, err = ExecSelect(config.DB, sel)
+		if err != nil {
+			return
+		}
+		if len(data) == 1 {
+			iter, _ := data[0][`c`]
+			count, err = strconv.ParseInt(fmt.Sprintf("%v", iter), 10, 64)
+			if err != nil {
+				return
+			}
+		}
+	}
+	c.Set("lazy-count", count)
+	c.Set("lazy-data", config.Results)
+	c.Set("lazy-results", map[string]interface{}{"count": count, "items": config.Results})
 	return
 }
 

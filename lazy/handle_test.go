@@ -23,20 +23,20 @@ func TestActionHandle(t *testing.T) {
 	r := router()
 
 	r.GET("/dogs", func(c *gin.Context) {
-		var ret []interface{}
 		config := Configuration{
-			DB:     gormDB,
-			Table:  "dogs",
-			Columm: "*",
-			Model:  &Dog{},
-			Target: ret,
+			DB:        gormDB,
+			Table:     "dogs",
+			Columm:    "*",
+			Model:     &Dog{},
+			Results:   []interface{}{},
+			NeedCount: true,
 		}
 		c.Set("lazy-configuration", &config)
 		if _, err := Handle(c); err != nil {
 			c.Set("error_msg", err.Error())
 			return
 		}
-		c.Set("ret", map[string]interface{}{"data": config.Target})
+		c.Set("ret", map[string]interface{}{"data": config.Results})
 		return
 	})
 
@@ -52,6 +52,7 @@ func TestActionHandle(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, 200, w.Code)
 	assert.NoError(t, err)
+	logrus.Print(response.Data)
 }
 
 func TestBeforeActionHandle(t *testing.T) {
@@ -68,17 +69,17 @@ func TestBeforeActionHandle(t *testing.T) {
 				ResultMap: map[string]string{"dog_id": "id"},
 				Action:    DefaultBeforeAction,
 			},
-			Table:  "dogs",
-			Columm: "*",
-			Model:  &Dog{},
-			Target: ret,
+			Table:   "dogs",
+			Columm:  "*",
+			Model:   &Dog{},
+			Results: ret,
 		}
 		c.Set("lazy-configuration", &config)
 		if _, err := Handle(c); err != nil {
 			c.Set("error_msg", err.Error())
 			return
 		}
-		c.Set("ret", map[string]interface{}{"data": config.Target})
+		c.Set("ret", map[string]interface{}{"data": config.Results})
 		return
 	})
 
