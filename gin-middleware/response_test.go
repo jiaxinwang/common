@@ -7,13 +7,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
-
-func init() {
-	logrus.SetReportCaller(true)
-}
 
 func route() *gin.Engine {
 	r := gin.Default()
