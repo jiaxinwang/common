@@ -7,7 +7,6 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
 	"github.com/jiaxinwang/common"
-	"github.com/sirupsen/logrus"
 )
 
 // Handle executes actions and returns response
@@ -54,7 +53,6 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 		if err := MapStruct(v, config.Model); err != nil {
 			return nil, err
 		}
-		logrus.WithField("v", v).WithField("model", config.Model).Info()
 		tmp := clone(config.Model)
 		config.Target = append(config.Target, tmp)
 	}

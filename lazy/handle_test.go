@@ -52,9 +52,6 @@ func TestActionHandle(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, 200, w.Code)
 	assert.NoError(t, err)
-	logrus.Print(response)
-	logrus.Print(response.Data)
-
 }
 
 func TestBeforeActionHandle(t *testing.T) {
