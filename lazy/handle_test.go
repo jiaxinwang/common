@@ -21,7 +21,6 @@ func router() *gin.Engine {
 
 func TestActionHandle(t *testing.T) {
 	r := router()
-
 	r.GET("/dogs", func(c *gin.Context) {
 		config := Configuration{
 			DB:        gormDB,
@@ -36,7 +35,9 @@ func TestActionHandle(t *testing.T) {
 			c.Set("error_msg", err.Error())
 			return
 		}
-		c.Set("ret", map[string]interface{}{"data": config.Results})
+		if v, exist := c.Get("lazy-results"); exist {
+			c.Set("ret", map[string]interface{}{"data": v})
+		}
 		return
 	})
 
@@ -52,7 +53,36 @@ func TestActionHandle(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, 200, w.Code)
 	assert.NoError(t, err)
-	logrus.Print(response.Data)
+}
+
+func TestActionHandleMiddleware(t *testing.T) {
+	r := router()
+	r.Use(Middleware)
+	r.GET("/dogs", func(c *gin.Context) {
+		config := Configuration{
+			DB:        gormDB,
+			Table:     "dogs",
+			Columm:    "*",
+			Model:     &Dog{},
+			Results:   []interface{}{},
+			NeedCount: true,
+		}
+		c.Set("lazy-configuration", &config)
+		return
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/dogs", nil)
+	q := req.URL.Query()
+	q.Add("id", `1`)
+	q.Add("id", `2`)
+	req.URL.RawQuery = q.Encode()
+
+	r.ServeHTTP(w, req)
+	response := Response{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Equal(t, 200, w.Code)
+	assert.NoError(t, err)
 }
 
 func TestBeforeActionHandle(t *testing.T) {
