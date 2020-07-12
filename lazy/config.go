@@ -9,7 +9,7 @@ import (
 type Configuration struct {
 	DB        *gorm.DB
 	Table     string
-	Columm    string
+	Columms   string
 	Model     interface{}
 	Results   []interface{}
 	Before    *ActionConfiguration

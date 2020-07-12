@@ -20,6 +20,7 @@ type Dog struct {
 	CreatedAt time.Time `json:"created_at" lazy:"created_at" mapstructure:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" lazy:"updated_at" mapstructure:"updated_at"`
 	Name      string    `json:"name" lazy:"name" mapstructure:"name"`
+	Profile   Profile   `json:"profile" lazy:"profile;foreign:profiles.dog_id"`
 }
 
 type Profile struct {

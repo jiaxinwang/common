@@ -46,7 +46,7 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 
 	eq, gt, lt, gte, lte := LazyURLValues(config.Model, merged)
 
-	sel := sq.Select(config.Columm).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
+	sel := sq.Select(config.Columms).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
 	sel = SelectBuilder(sel, eq, gt, lt, gte, lte)
 	data, err = ExecSelect(config.DB, sel)
 	if err != nil {

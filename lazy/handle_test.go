@@ -25,7 +25,7 @@ func TestActionHandle(t *testing.T) {
 		config := Configuration{
 			DB:        gormDB,
 			Table:     "dogs",
-			Columm:    "*",
+			Columms:   "*",
 			Model:     &Dog{},
 			Results:   []interface{}{},
 			NeedCount: true,
@@ -62,11 +62,11 @@ func TestActionHandleMiddleware(t *testing.T) {
 		config := Configuration{
 			DB:        gormDB,
 			Table:     "dogs",
-			Columm:    "*",
+			Columms:   "*",
 			Model:     &Dog{},
 			Results:   []interface{}{},
 			NeedCount: true,
-		} 
+		}
 		c.Set("lazy-configuration", &config)
 		return
 	})
@@ -101,7 +101,7 @@ func TestBeforeActionHandle(t *testing.T) {
 				Action:    DefaultBeforeAction,
 			},
 			Table:   "dogs",
-			Columm:  "*",
+			Columms: "*",
 			Model:   &Dog{},
 			Results: ret,
 		}
@@ -128,3 +128,46 @@ func TestBeforeActionHandle(t *testing.T) {
 	assert.NoError(t, err)
 	logrus.Print(ret)
 }
+
+// func TestAfterActionHandle(t *testing.T) {
+// 	r := router()
+
+// 	r.GET("/dogs", func(c *gin.Context) {
+// 		var ret []interface{}
+// 		config := Configuration{
+// 			DB: gormDB,
+// 			After: &ActionConfiguration{
+// 				Table:     "profiles",
+// 				Columms:   "dog_id",
+// 				Model:     &Profile{},
+// 				ResultMap: map[string]string{"dog_id": "id"},
+// 				Action:    DefaultBeforeAction,
+// 			},
+// 			Table:   "dogs",
+// 			Columms: "*",
+// 			Model:   &Dog{},
+// 			Results: ret,
+// 		}
+// 		c.Set("lazy-configuration", &config)
+// 		if _, err := Handle(c); err != nil {
+// 			c.Set("error_msg", err.Error())
+// 			return
+// 		}
+// 		c.Set("ret", map[string]interface{}{"data": config.Results})
+// 		return
+// 	})
+
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("GET", "/dogs", nil)
+// 	q := req.URL.Query()
+// 	q.Add("before_dog_id", `1`)
+// 	q.Add("before_dog_id", `2`)
+// 	req.URL.RawQuery = q.Encode()
+
+// 	r.ServeHTTP(w, req)
+// 	ret := Response{}
+// 	err := json.Unmarshal(w.Body.Bytes(), &ret)
+// 	assert.Equal(t, 200, w.Code)
+// 	assert.NoError(t, err)
+// 	logrus.Print(ret)
+// }
