@@ -5,8 +5,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// SelectBuilder builds SelectBuilder
-
 // UpdateBuilder builds UpdateBuilder
 func UpdateBuilder(s sq.UpdateBuilder, eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) sq.UpdateBuilder {
 	for k, v := range eq {

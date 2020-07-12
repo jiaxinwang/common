@@ -484,29 +484,31 @@ func LazyURLValues(s interface{}, q url.Values) (eqm map[string][]interface{}, g
 
 // SelectBuilder ...
 func SelectBuilder(s sq.SelectBuilder, eq map[string][]interface{}, gt, lt, gte, lte map[string]interface{}) sq.SelectBuilder {
-	for k, v := range eq {
-		switch {
-		case len(v) == 1:
-			eqs := sq.Eq{k: v[0]}
-			s = s.Where(eqs)
-		case len(v) > 1:
-			eqs := sq.Eq{k: v}
-			s = s.Where(eqs)
+	if eq != nil {
+		for k, v := range eq {
+			switch {
+			case len(v) == 1:
+				eqs := sq.Eq{k: v[0]}
+				s = s.Where(eqs)
+			case len(v) > 1:
+				eqs := sq.Eq{k: v}
+				s = s.Where(eqs)
+			}
 		}
 	}
-	if len(gt) > 0 {
+	if gt != nil && len(gt) > 0 {
 		m := sq.Gt(gt)
 		s = s.Where(m)
 	}
-	if len(lt) > 0 {
+	if lt != nil && len(lt) > 0 {
 		m := sq.Lt(lt)
 		s = s.Where(m)
 	}
-	if len(gte) > 0 {
+	if gte != nil && len(gte) > 0 {
 		m := sq.GtOrEq(gte)
 		s = s.Where(m)
 	}
-	if len(lte) > 0 {
+	if lte != nil && len(lte) > 0 {
 		m := sq.LtOrEq(lte)
 		s = s.Where(m)
 	}
@@ -514,8 +516,10 @@ func SelectBuilder(s sq.SelectBuilder, eq map[string][]interface{}, gt, lt, gte,
 }
 
 // SelectEq ...
-func SelectEq(db *gorm.DB, table, columms string, eq map[string]interface{}) (ret []map[string]interface{}, err error) {
-	return
+func SelectEq(db *gorm.DB, table, columms string, eq map[string][]interface{}) (ret []map[string]interface{}, err error) {
+	sel := sq.Select(columms).From(table)
+	sel = SelectBuilder(sel, eq, nil, nil, nil, nil)
+	return ExecSelect(db, sel)
 }
 
 // ExecSelect ...

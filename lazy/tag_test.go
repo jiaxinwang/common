@@ -52,6 +52,7 @@ func Test_disassembleTag(t *testing.T) {
 	}{
 		{"name", args{tag: "tag_name"}, `tag_name`, ``, ``, ``, false},
 		{"foreign", args{tag: "tag_name;foreign:id->table.pid"}, `tag_name`, `id`, `table`, `pid`, false},
+		{"dog", args{tag: "profile;foreign:id->profiles.dog_id"}, `profile`, `id`, `profiles`, `dog_id`, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

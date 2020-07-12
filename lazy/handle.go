@@ -8,7 +8,8 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+
+	"github.com/tidwall/sjson"
 )
 
 // Handle executes actions and returns response
@@ -63,8 +64,20 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 		tmp := clone(config.Model)
 
 		for _, v := range set {
-			logrus.WithField(`set`, v).Print()
+			value := valueOfTag(tmp, v[1])
+			eq := map[string][]interface{}{v[ForeignOfModelForeignID]: []interface{}{value}}
+			data, err := SelectEq(config.DB, v[ForeignOfModelForeignTable], "*", eq)
+			if err != nil {
+				return nil, err
+			}
+			if len(data) == 1 {
+				jbyte, _ := json.Marshal(tmp)
+				assemble, _ := sjson.Set(string(jbyte), v[ForeignOfModelName], data[0])
+				json.Unmarshal([]byte(assemble), tmp)
+			}
 		}
+
+		// TODO: batch
 
 		config.Results = append(config.Results, tmp)
 	}

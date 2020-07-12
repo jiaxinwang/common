@@ -20,6 +20,17 @@ func valueOfTag(inter interface{}, tagName string) interface{} {
 	return nil
 }
 
+const (
+	// ForeignOfModelName ...
+	ForeignOfModelName = 0
+	// ForeignOfModelID ...
+	ForeignOfModelID = 1
+	// ForeignOfModelForeignTable ...
+	ForeignOfModelForeignTable = 2
+	// ForeignOfModelForeignID ...
+	ForeignOfModelForeignID = 3
+)
+
 func foreignOfModel(inter interface{}) [][4]string {
 	ret := make([][4]string, 0)
 
