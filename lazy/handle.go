@@ -8,6 +8,8 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
+
+	"github.com/tidwall/sjson"
 )
 
 // Handle executes actions and returns response
@@ -18,6 +20,8 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 	} else {
 		return nil, errors.New("can't find lazy-configuration")
 	}
+
+	set := foreignOfModel((*config).Model)
 
 	if config.Before != nil {
 		_, _, errBefore := config.Before.Action(c, config.DB, *config, nil)
@@ -46,7 +50,7 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 
 	eq, gt, lt, gte, lte := LazyURLValues(config.Model, merged)
 
-	sel := sq.Select(config.Columm).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
+	sel := sq.Select(config.Columms).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
 	sel = SelectBuilder(sel, eq, gt, lt, gte, lte)
 	data, err = ExecSelect(config.DB, sel)
 	if err != nil {
@@ -58,6 +62,23 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 			return nil, err
 		}
 		tmp := clone(config.Model)
+
+		for _, v := range set {
+			value := valueOfTag(tmp, v[1])
+			eq := map[string][]interface{}{v[ForeignOfModelForeignID]: []interface{}{value}}
+			data, err := SelectEq(config.DB, v[ForeignOfModelForeignTable], "*", eq)
+			if err != nil {
+				return nil, err
+			}
+			if len(data) == 1 {
+				jbyte, _ := json.Marshal(tmp)
+				assemble, _ := sjson.Set(string(jbyte), v[ForeignOfModelName], data[0])
+				json.Unmarshal([]byte(assemble), tmp)
+			}
+		}
+
+		// TODO: batch
+
 		config.Results = append(config.Results, tmp)
 	}
 

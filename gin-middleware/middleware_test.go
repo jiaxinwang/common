@@ -1,4 +1,4 @@
-package lazy
+package middleware
 
 import (
 	"os"
@@ -6,21 +6,15 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/sirupsen/logrus"
 )
-
-type Response struct {
-	Data     interface{} `json:"data"`
-	ErrorMsg string      `json:"error_msg"`
-	ErrorNo  int         `json:"error_no"`
-}
 
 type Dog struct {
 	ID        uint      `gorm:"primary_key" json:"id" lazy:"id" mapstructure:"id"`
 	CreatedAt time.Time `json:"created_at" lazy:"created_at" mapstructure:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" lazy:"updated_at" mapstructure:"updated_at"`
-	Name      string    `json:"name" lazy:"name" mapstructure:"name"`
-	Profile   Profile   `json:"profile" lazy:"profile;foreign:id->profiles.dog_id"`
+	Name      string    `json:"name" lazy:"name" mapstructure:"id"`
 }
 
 type Profile struct {

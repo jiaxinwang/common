@@ -10,6 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func beforeRoute() *gin.Engine {
+	r := gin.Default()
+	r.Use(Trace)
+	r.Use(LazyResponse)
+	r.GET("/dog", func(c *gin.Context) {
+		c.Set("ret", map[string]interface{}{"data": nil})
+		return
+	})
+
+	return r
+}
+
 func route() *gin.Engine {
 	r := gin.Default()
 	r.Use(Trace)
@@ -41,8 +53,6 @@ func route() *gin.Engine {
 			"ret",
 			map[string]interface{}{
 				"data": int(10086),
-				// "error_no":  0,
-				// "error_msg": "",
 			},
 		)
 		return
@@ -54,8 +64,6 @@ func route() *gin.Engine {
 				"data": struct {
 					Name string
 				}{Name: "monkey"},
-				// "error_no":  0,
-				// "error_msg": "",
 			},
 		)
 		return
