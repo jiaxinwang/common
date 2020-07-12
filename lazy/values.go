@@ -32,8 +32,8 @@ func LazyTagSlice(v interface{}, m map[string][]string) map[string][]interface{}
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		tag := field.Tag
-		if t := tag.Get(`lazy`); t != `` {
+		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				ret[t] = make([]interface{}, 0)
 				for _, vvv := range vv {
@@ -107,8 +107,8 @@ func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		tag := field.Tag
-		if t := tag.Get(`lazy`); t != `` {
+		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				name := field.Name
 				r := reflect.ValueOf(v)
@@ -166,7 +166,7 @@ func StructMap(src interface{}, timeLayout string) (ret map[string]interface{}, 
 				switch vofs.Field(i).Interface().(type) {
 				case *time.Time:
 					t := vofs.Field(i).Interface().(*time.Time)
-					name := tofs.Field(i).Tag.Get(`lazy`)
+					name, _, _, _ := disassembleTag(tofs.Field(i).Tag.Get(`lazy`))
 					if _, ok := ret[name]; ok {
 						if t != nil {
 							ret[name] = t.Format(timeLayout)
@@ -174,7 +174,7 @@ func StructMap(src interface{}, timeLayout string) (ret map[string]interface{}, 
 					}
 				case time.Time:
 					t := vofs.Field(i).Interface().(time.Time)
-					name := tofs.Field(i).Tag.Get(`lazy`)
+					name, _, _, _ := disassembleTag(tofs.Field(i).Tag.Get(`lazy`))
 					if _, ok := ret[name]; ok {
 						ret[name] = t.Format(timeLayout)
 					}
@@ -290,8 +290,8 @@ func TagSlice(v interface{}, m map[string][]string) map[string][]interface{} {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		tag := field.Tag
-		if t := tag.Get(`lazy`); t != `` {
+		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				ret[t] = make([]interface{}, 0)
 				for _, vvv := range vv {
@@ -310,8 +310,8 @@ func Tag(v interface{}, m map[string]string) map[string]interface{} {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		tag := field.Tag
-		if t := tag.Get(`lazy`); t != `` {
+		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				name := field.Name
 				r := reflect.ValueOf(v)
