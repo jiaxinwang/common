@@ -64,7 +64,7 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 		tmp := clone(config.Model)
 
 		for _, v := range set {
-			value := valueOfTag(tmp, v[1])
+			value := valueOfTag(tmp, v[ForeignOfModelID])
 			eq := map[string][]interface{}{v[ForeignOfModelForeignID]: []interface{}{value}}
 			data, err := SelectEq(config.DB, v[ForeignOfModelForeignTable], "*", eq)
 			if err != nil {
