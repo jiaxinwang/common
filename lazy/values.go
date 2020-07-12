@@ -32,7 +32,7 @@ func LazyTagSlice(v interface{}, m map[string][]string) map[string][]interface{}
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		name, _, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
 		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				ret[t] = make([]interface{}, 0)
@@ -107,7 +107,7 @@ func LazyTag(v interface{}, m map[string]string) map[string]interface{} {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		name, _, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
 		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				name := field.Name
@@ -166,7 +166,7 @@ func StructMap(src interface{}, timeLayout string) (ret map[string]interface{}, 
 				switch vofs.Field(i).Interface().(type) {
 				case *time.Time:
 					t := vofs.Field(i).Interface().(*time.Time)
-					name, _, _, _ := disassembleTag(tofs.Field(i).Tag.Get(`lazy`))
+					name, _, _, _, _ := disassembleTag(tofs.Field(i).Tag.Get(`lazy`))
 					if _, ok := ret[name]; ok {
 						if t != nil {
 							ret[name] = t.Format(timeLayout)
@@ -174,7 +174,7 @@ func StructMap(src interface{}, timeLayout string) (ret map[string]interface{}, 
 					}
 				case time.Time:
 					t := vofs.Field(i).Interface().(time.Time)
-					name, _, _, _ := disassembleTag(tofs.Field(i).Tag.Get(`lazy`))
+					name, _, _, _, _ := disassembleTag(tofs.Field(i).Tag.Get(`lazy`))
 					if _, ok := ret[name]; ok {
 						ret[name] = t.Format(timeLayout)
 					}
@@ -290,7 +290,7 @@ func TagSlice(v interface{}, m map[string][]string) map[string][]interface{} {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		name, _, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
 		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				ret[t] = make([]interface{}, 0)
@@ -310,7 +310,7 @@ func Tag(v interface{}, m map[string]string) map[string]interface{} {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		name, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
+		name, _, _, _, _ := disassembleTag(field.Tag.Get(`lazy`))
 		if t := name; t != `` {
 			if vv, ok := m[t]; ok {
 				name := field.Name
@@ -513,7 +513,12 @@ func SelectBuilder(s sq.SelectBuilder, eq map[string][]interface{}, gt, lt, gte,
 	return s
 }
 
-// SelectBuild ...
+// SelectEq ...
+func SelectEq(db *gorm.DB, table, columms string, eq map[string]interface{}) (ret []map[string]interface{}, err error) {
+	return
+}
+
+// ExecSelect ...
 func ExecSelect(db *gorm.DB, active sq.SelectBuilder) (ret []map[string]interface{}, err error) {
 	ret = make([]map[string]interface{}, 0)
 	sql, args, err := active.ToSql()

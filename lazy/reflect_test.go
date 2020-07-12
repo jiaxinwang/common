@@ -6,21 +6,23 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Test_foreignOfModel(t *testing.T) {
+func Test_valueOfTag(t *testing.T) {
 	type args struct {
-		inter interface{}
+		inter   interface{}
+		tagName string
 	}
 	tests := []struct {
 		name string
 		args args
-		want [][3]string
+		want interface{}
 	}{
-		{"dog", args{inter: Dog{}}, [][3]string{[3]string{`Profile`, `profiles`, `dog_id`}}},
+		{"profile", args{inter: &Profile{}, tagName: "id"}, uint(0)},
+		{"profile", args{inter: &Profile{Age: 2}, tagName: "age"}, uint(2)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := foreignOfModel(tt.args.inter); !cmp.Equal(got, tt.want) {
-				t.Errorf("foreignOfModel() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
+			if got := valueOfTag(tt.args.inter, tt.args.tagName); !cmp.Equal(got, tt.want) {
+				t.Errorf("valueOfTag() = %v, want %v\ndiff=%v", got, tt.want, cmp.Diff(got, tt.want))
 			}
 		})
 	}

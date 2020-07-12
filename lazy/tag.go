@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func disassembleTag(tag string) (name, foreignkeyTable, foreignkey string, err error) {
+func disassembleTag(tag string) (name, id, foreignkeyTable, foreignkey string, err error) {
 	part := strings.Split(tag, `;`)
 	for _, v := range part {
 		if strings.Contains(v, `:`) {
@@ -16,13 +16,19 @@ func disassembleTag(tag string) (name, foreignkeyTable, foreignkey string, err e
 			}
 			switch pair[0] {
 			case `foreign`:
-				f := strings.Split(pair[1], ".")
+				f := strings.Split(pair[1], "->")
 				if len(f) != 2 {
 					err = errors.New("wrong format")
 					return
 				}
-				foreignkeyTable = f[0]
-				foreignkey = f[1]
+				id = f[0]
+				ff := strings.Split(f[1], ".")
+				if len(f) != 2 {
+					err = errors.New("wrong format")
+					return
+				}
+				foreignkeyTable = ff[0]
+				foreignkey = ff[1]
 			}
 		} else {
 			name = v

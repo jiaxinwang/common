@@ -8,6 +8,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // Handle executes actions and returns response
@@ -18,6 +19,8 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 	} else {
 		return nil, errors.New("can't find lazy-configuration")
 	}
+
+	set := foreignOfModel((*config).Model)
 
 	if config.Before != nil {
 		_, _, errBefore := config.Before.Action(c, config.DB, *config, nil)
@@ -58,6 +61,11 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 			return nil, err
 		}
 		tmp := clone(config.Model)
+
+		for _, v := range set {
+			logrus.WithField(`set`, v).Print()
+		}
+
 		config.Results = append(config.Results, tmp)
 	}
 
