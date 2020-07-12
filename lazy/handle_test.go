@@ -66,7 +66,7 @@ func TestActionHandleMiddleware(t *testing.T) {
 			Model:     &Dog{},
 			Results:   []interface{}{},
 			NeedCount: true,
-		}
+		} 
 		c.Set("lazy-configuration", &config)
 		return
 	})
@@ -83,6 +83,7 @@ func TestActionHandleMiddleware(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, 200, w.Code)
 	assert.NoError(t, err)
+	logrus.Print(response)
 }
 
 func TestBeforeActionHandle(t *testing.T) {

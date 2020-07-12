@@ -19,7 +19,7 @@ type Dog struct {
 	ID        uint      `gorm:"primary_key" json:"id" lazy:"id" mapstructure:"id"`
 	CreatedAt time.Time `json:"created_at" lazy:"created_at" mapstructure:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" lazy:"updated_at" mapstructure:"updated_at"`
-	Name      string    `json:"name" lazy:"name" mapstructure:"id"`
+	Name      string    `json:"name" lazy:"name" mapstructure:"name"`
 }
 
 type Profile struct {
