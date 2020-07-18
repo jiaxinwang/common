@@ -4,6 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	keyParams = `_lazy_params`
+)
+
+// MiddlewareTransParams trans params into content
+func MiddlewareTransParams(c *gin.Context) {
+	params := Params(c.Request.URL.Query())
+	c.Set(keyParams, params)
+	c.Next()
+}
+
 // Middleware run the query
 func Middleware(c *gin.Context) {
 	defer func() {

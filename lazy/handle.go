@@ -116,3 +116,11 @@ func clone(inter interface{}) interface{} {
 	}
 	return newInter.Interface()
 }
+
+func deepCopy(src, dst interface{}) error {
+	byt, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(byt, dst)
+}

@@ -21,7 +21,7 @@ func router() *gin.Engine {
 
 func TestActionHandle(t *testing.T) {
 	r := router()
-	r.GET("/dogs", func(c *gin.Context) {
+	r.Use(MiddlewareTransParams).GET("/dogs", func(c *gin.Context) {
 		config := Configuration{
 			DB:        gormDB,
 			Table:     "dogs",
