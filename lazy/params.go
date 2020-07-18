@@ -1,11 +1,35 @@
 package lazy
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 // Params maps a string key to a list of values.
 type Params map[string][]string
 
 func mergeParams(a, b Params) (ret Params) {
+	return
+}
+
+func valueOfParams(params Params, key string) (value string) {
+	if v, exist := params[key]; exist {
+		if len(v) == 1 {
+			return v[0]
+		}
+	}
+	return ``
+}
+
+func separatePage(params Params) (remain Params, page, limit, offset uint64) {
+	var s Params
+	s, remain = separateParams(params, "offset", "page", "limit")
+	str := valueOfParams(s, `offset`)
+	offset, _ = strconv.ParseUint(str, 10, 64)
+	str = valueOfParams(s, `page`)
+	page, _ = strconv.ParseUint(str, 10, 64)
+	str = valueOfParams(s, `limit`)
+	limit, _ = strconv.ParseUint(str, 10, 64)
 	return
 }
 

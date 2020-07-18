@@ -103,3 +103,51 @@ func Test_separatePrefixParams(t *testing.T) {
 		})
 	}
 }
+
+func Test_separatePage(t *testing.T) {
+	type args struct {
+		params Params
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantRemain Params
+		wantPage   uint64
+		wantLimit  uint64
+		wantOffset uint64
+	}{
+		{`case-1`, args{params: Params{}}, Params{}, 0, 0, 0},
+		{
+			`case-2`,
+			args{params: Params{`offset`: []string{`10`}, `limit`: []string{`2`}, `page`: []string{`3`}}},
+			Params{}, 3, 2, 10,
+		},
+		{
+			`case-3`,
+			args{params: Params{`offset`: []string{`10`, `20`}, `limit`: []string{`2`}, `page`: []string{`3`}}},
+			Params{}, 3, 2, 0,
+		},
+		{
+			`case-4`,
+			args{params: Params{`unused`: []string{`used`}, `offset`: []string{`10`, `20`}, `limit`: []string{`2`}, `page`: []string{`3`}}},
+			Params{`unused`: []string{`used`}}, 3, 2, 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotRemain, gotPage, gotLimit, gotOffset := separatePage(tt.args.params)
+			if !cmp.Equal(gotRemain, tt.wantRemain) {
+				t.Errorf("separatePage() gotRemain = %v, want %v\ndiff=%v", gotRemain, tt.wantRemain, cmp.Diff(gotRemain, tt.wantRemain))
+			}
+			if gotPage != tt.wantPage {
+				t.Errorf("separatePage() gotPage = %v, want %v", gotPage, tt.wantPage)
+			}
+			if gotLimit != tt.wantLimit {
+				t.Errorf("separatePage() gotLimit = %v, want %v", gotLimit, tt.wantLimit)
+			}
+			if gotOffset != tt.wantOffset {
+				t.Errorf("separatePage() gotOffset = %v, want %v", gotOffset, tt.wantOffset)
+			}
+		})
+	}
+}
