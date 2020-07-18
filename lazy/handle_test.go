@@ -39,7 +39,7 @@ func buildDogGetRouter(r *gin.Engine) *gin.Engine {
 			c.Set("error_msg", err.Error())
 			return
 		}
-		if v, exist := c.Get("lazy-results"); exist {
+		if v, exist := c.Get(keyResults); exist {
 			c.Set("ret", map[string]interface{}{"data": v})
 		}
 		return
@@ -66,10 +66,11 @@ func TestActionHandlePage(t *testing.T) {
 
 	var ret Ret
 	MapStruct(response.Data.(map[string]interface{}), &ret)
-	logrus.Printf("%+v", ret)
+	// logrus.Printf("%+v", ret)
 
-	// b, _ := json.Marshal(response.Data)
-	// logrus.Print(string(b))
+	assert.Equal(t, 2, ret.Count)
+	assert.Equal(t, 1, len(ret.Items))
+
 }
 
 func TestActionHandle(t *testing.T) {

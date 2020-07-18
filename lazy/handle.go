@@ -8,6 +8,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 
 	"github.com/tidwall/sjson"
 )
@@ -84,7 +85,7 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 	count := int64(len(data))
 
 	if config.NeedCount {
-		sel := sq.Select(`count(1) as c`).From(config.Table).Limit(limit).Offset(limit*page + offset)
+		sel := sq.Select(`count(1) as c`).From(config.Table)
 		sel = SelectBuilder(sel, eq, gt, lt, gte, lte)
 		data, err = ExecSelect(config.DB, sel)
 		if err != nil {
@@ -98,9 +99,10 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 			}
 		}
 	}
-	c.Set("lazy-count", count)
-	c.Set("lazy-data", config.Results)
-	c.Set("lazy-results", map[string]interface{}{"count": count, "items": config.Results})
+	logrus.WithField("count", count).Info()
+	c.Set(keyCount, count)
+	c.Set(keyData, config.Results)
+	c.Set(keyResults, map[string]interface{}{"count": count, "items": config.Results})
 	return
 }
 
