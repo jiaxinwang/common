@@ -5,7 +5,10 @@ import (
 )
 
 var (
-	keyParams = `_lazy_params`
+	keyParams  = `_lazy_params`
+	keyResults = `_lazy_results`
+	keyCount   = `_lazy_count`
+	keyData    = `_lazy_data`
 )
 
 // MiddlewareTransParams trans params into content
@@ -22,7 +25,7 @@ func Middleware(c *gin.Context) {
 			c.Set("error_msg", err.Error())
 			return
 		}
-		if data, exist := c.Get("lazy-results"); exist {
+		if data, exist := c.Get(keyResults); exist {
 			c.Set("ret", map[string]interface{}{"data": data})
 		}
 		return

@@ -3,6 +3,7 @@ package lazy
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
@@ -15,21 +16,27 @@ type Response struct {
 }
 
 type DogFood struct {
-	Model
-	Name string `json:"name" lazy:"name" mapstructure:"name"`
+	ID        uint      `gorm:"primarykey" json:"id" lazy:"id" mapstructure:"id"`
+	CreatedAt time.Time `json:"created_at" lazy:"created_at" mapstructure:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" lazy:"updated_at" mapstructure:"updated_at"`
+	Name      string    `json:"name" lazy:"name" mapstructure:"name"`
 }
 
 type Dog struct {
-	Model
-	Name    string  `json:"name" lazy:"name" mapstructure:"name"`
-	Profile Profile `json:"profile" lazy:"profile;foreign:id->profiles.dog_id"`
+	ID        uint      `gorm:"primarykey" json:"id" lazy:"id" mapstructure:"id"`
+	CreatedAt time.Time `json:"created_at" lazy:"created_at" mapstructure:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" lazy:"updated_at" mapstructure:"updated_at"`
+	Name      string    `json:"name" lazy:"name" mapstructure:"name"`
+	Profile   Profile   `json:"profile" mapstructure:"profile" lazy:"profile;foreign:id->profiles.dog_id"`
 }
 
 type Profile struct {
-	Model
-	Breed string `json:"bread" lazy:"breed" mapstructure:"breed"`
-	Age   uint   `json:"age" lazy:"age" mapstructure:"age"`
-	DogID uint   `json:"-" lazy:"dog_id" mapstructure:"dog_id"`
+	ID        uint      `gorm:"primarykey" json:"id" lazy:"id" mapstructure:"id"`
+	CreatedAt time.Time `json:"created_at" lazy:"created_at" mapstructure:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" lazy:"updated_at" mapstructure:"updated_at"`
+	Breed     string    `json:"bread" lazy:"breed" mapstructure:"breed"`
+	Age       uint      `json:"age" lazy:"age" mapstructure:"age"`
+	DogID     uint      `json:"-" lazy:"dog_id" mapstructure:"dog_id"`
 }
 
 var gormDB *gorm.DB

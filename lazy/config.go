@@ -20,9 +20,9 @@ type Configuration struct {
 // ActionConfiguration configs action, before-action, after-action values and actions
 type ActionConfiguration struct {
 	Table     string
-	Columms   string
 	Model     interface{}
 	ResultMap map[string]string
 	Action    func(c *gin.Context, gormDB *gorm.DB, config Configuration, payload interface{}) (result interface{}, reduce map[string][]string, err error)
-	Target    []interface{}
+	// Target    []interface{}
+	// Columms   string
 }
