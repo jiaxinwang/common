@@ -15,10 +15,10 @@ import (
 // Handle executes actions and returns response
 func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 	var config *Configuration
-	if v, ok := c.Get("lazy-configuration"); ok {
+	if v, ok := c.Get("_lazy_configuration"); ok {
 		config = v.(*Configuration)
 	} else {
-		return nil, errors.New("can't find lazy-configuration")
+		return nil, errors.New("can't find lazy configuration")
 	}
 
 	set := foreignOfModel((*config).Model)
@@ -30,16 +30,15 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 		}
 	}
 
-	param := struct {
-		Offset uint64 `form:"offset" binding:"gte=0"`
-		Page   uint64 `form:"page" binding:"gte=0"`
-		Size   uint64 `form:"size" binding:"gte=1,lte=1000"`
-	}{
-		Size: 1000,
+	paramsItr, ok := c.Get(keyParams)
+	if !ok {
+		return nil, errors.New("can't find lazy params")
 	}
-
-	if err = c.ShouldBindQuery(&param); err != nil {
-		return nil, err
+	params := paramsItr.(Params)
+	remain, page, limit, offset := separatePage(params)
+	c.Set(keyParams, remain)
+	if limit == 0 {
+		limit = 10000
 	}
 
 	var merged map[string][]string
@@ -50,7 +49,7 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 
 	eq, gt, lt, gte, lte := LazyURLValues(config.Model, merged)
 
-	sel := sq.Select(config.Columms).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
+	sel := sq.Select(config.Columms).From(config.Table).Limit(limit).Offset(limit*page + offset)
 	sel = SelectBuilder(sel, eq, gt, lt, gte, lte)
 	data, err = ExecSelect(config.DB, sel)
 	if err != nil {
@@ -85,7 +84,7 @@ func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
 	count := int64(len(data))
 
 	if config.NeedCount {
-		sel := sq.Select(`count(1) as c`).From(config.Table).Limit(param.Size).Offset(param.Size * param.Page)
+		sel := sq.Select(`count(1) as c`).From(config.Table).Limit(limit).Offset(limit*page + offset)
 		sel = SelectBuilder(sel, eq, gt, lt, gte, lte)
 		data, err = ExecSelect(config.DB, sel)
 		if err != nil {
