@@ -1,5 +1,7 @@
 package lazy
 
+import "strings"
+
 // Params maps a string key to a list of values.
 type Params map[string][]string
 
@@ -24,4 +26,14 @@ func separateParams(whole Params, keys ...string) (separated, remain Params) {
 		}
 	}
 	return
+}
+
+func separatePrefixParams(whole Params, prefix string) (separated, remain Params) {
+	keys := make([]string, 0)
+	for k := range whole {
+		if strings.HasPrefix(k, prefix) {
+			keys = append(keys, k)
+		}
+	}
+	return separateParams(whole, keys...)
 }
