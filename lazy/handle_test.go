@@ -24,6 +24,22 @@ func router() *gin.Engine {
 	return r
 }
 
+func buildDogGetMiddlewareRouter(r *gin.Engine) *gin.Engine {
+	r.Use(Middleware).Use(MiddlewareTransParams).GET("/dogs", func(c *gin.Context) {
+		config := Configuration{
+			DB:        gormDB,
+			Table:     "dogs",
+			Columms:   "*",
+			Model:     &Dog{},
+			Results:   []interface{}{},
+			NeedCount: true,
+		}
+		c.Set("_lazy_configuration", &config)
+		return
+	})
+	return r
+}
+
 func buildDogGetRouter(r *gin.Engine) *gin.Engine {
 	r.Use(MiddlewareTransParams).GET("/dogs", func(c *gin.Context) {
 		config := Configuration{
@@ -91,21 +107,7 @@ func TestActionHandle(t *testing.T) {
 }
 
 func TestActionHandleMiddleware(t *testing.T) {
-	r := router()
-	r.Use(Middleware)
-	r.GET("/dogs", func(c *gin.Context) {
-		config := Configuration{
-			DB:        gormDB,
-			Table:     "dogs",
-			Columms:   "*",
-			Model:     &Dog{},
-			Results:   []interface{}{},
-			NeedCount: true,
-		}
-		c.Set("_lazy_configuration", &config)
-		return
-	})
-
+	r := buildDogGetMiddlewareRouter(router())
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/dogs", nil)
 	q := req.URL.Query()
@@ -118,7 +120,12 @@ func TestActionHandleMiddleware(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, 200, w.Code)
 	assert.NoError(t, err)
-	logrus.Print(response)
+	var ret Ret
+	MapStruct(response.Data.(map[string]interface{}), &ret)
+	// logrus.Printf("%+v", ret)
+
+	assert.Equal(t, 2, ret.Count)
+	assert.Equal(t, 2, len(ret.Items))
 }
 
 func TestBeforeActionHandle(t *testing.T) {
