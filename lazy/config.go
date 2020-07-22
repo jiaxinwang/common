@@ -21,8 +21,9 @@ type Configuration struct {
 type ActionConfiguration struct {
 	Table     string
 	Model     interface{}
-	ResultMap map[string]string
 	Action    func(c *gin.Context, gormDB *gorm.DB, config Configuration, payload interface{}) (result interface{}, reduce map[string][]string, err error)
+	Params    []string
+	ResultMap map[string]string
 	// Target    []interface{}
 	// Columms   string
 }

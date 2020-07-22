@@ -139,6 +139,7 @@ func TestBeforeActionHandle(t *testing.T) {
 				Model:     &Profile{},
 				ResultMap: map[string]string{"dog_id": "id"},
 				Action:    DefaultBeforeAction,
+				Params:    []string{`before_dog_id`},
 			},
 			Table:   "dogs",
 			Columms: "*",
