@@ -1,6 +1,8 @@
 package lazy
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,13 +22,18 @@ func MiddlewareTransParams(c *gin.Context) {
 
 // Middleware run the query
 func Middleware(c *gin.Context) {
+
 	defer func() {
-		if _, err := Handle(c); err != nil {
-			c.Set("error_msg", err.Error())
-			return
-		}
-		if data, exist := c.Get(keyResults); exist {
-			c.Set("ret", map[string]interface{}{"data": data})
+		switch c.Request.Method {
+		case http.MethodGet:
+			if _, err := GetHandle(c); err != nil {
+				c.Set("error_msg", err.Error())
+				return
+			}
+			if data, exist := c.Get(keyResults); exist {
+				c.Set("ret", map[string]interface{}{"data": data})
+			}
+		case http.MethodDelete:	
 		}
 		return
 	}()

@@ -51,7 +51,7 @@ func buildDogGetRouter(r *gin.Engine) *gin.Engine {
 			NeedCount: true,
 		}
 		c.Set("_lazy_configuration", &config)
-		if _, err := Handle(c); err != nil {
+		if _, err := GetHandle(c); err != nil {
 			c.Set("error_msg", err.Error())
 			return
 		}
@@ -147,7 +147,7 @@ func TestBeforeActionHandle(t *testing.T) {
 			Results: ret,
 		}
 		c.Set("_lazy_configuration", &config)
-		if _, err := Handle(c); err != nil {
+		if _, err := GetHandle(c); err != nil {
 			c.Set("error_msg", err.Error())
 			return
 		}

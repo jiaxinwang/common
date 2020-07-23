@@ -13,8 +13,8 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-// Handle executes actions and returns response
-func Handle(c *gin.Context) (data []map[string]interface{}, err error) {
+// GetHandle executes actions and returns response
+func GetHandle(c *gin.Context) (data []map[string]interface{}, err error) {
 	var config *Configuration
 	if v, ok := c.Get("_lazy_configuration"); ok {
 		config = v.(*Configuration)
