@@ -8,10 +8,20 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 
 	"github.com/tidwall/sjson"
 )
+
+// DeleteHandle executes delete action.
+func DeleteHandle(c *gin.Context) (data []map[string]interface{}, err error) {
+	id := c.Param("id")
+	if err = validator.New().Var(id, "required,number"); err != nil {
+		return nil, err
+	}
+	return
+}
 
 // GetHandle executes actions and returns response
 func GetHandle(c *gin.Context) (data []map[string]interface{}, err error) {

@@ -9,6 +9,8 @@ import (
 	gm "github.com/jiaxinwang/common/gin-middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type Ret struct {
@@ -37,6 +39,19 @@ func buildDogGetMiddlewareRouter(r *gin.Engine) *gin.Engine {
 		c.Set("_lazy_configuration", &config)
 		return
 	})
+	r.Use(Middleware).Use(MiddlewareTransParams).DELETE("/dog/:id", func(c *gin.Context) {
+		config := Configuration{
+			DB:        gormDB,
+			Table:     "dogs",
+			Columms:   "*",
+			Model:     &Dog{},
+			Results:   []interface{}{},
+			NeedCount: true,
+		}
+		c.Set("_lazy_configuration", &config)
+		return
+	})
+
 	return r
 }
 
@@ -84,7 +99,7 @@ func TestActionHandlePage(t *testing.T) {
 	MapStruct(response.Data.(map[string]interface{}), &ret)
 	// logrus.Printf("%+v", ret)
 
-	assert.Equal(t, 2, ret.Count)
+	assert.Equal(t, 9, ret.Count)
 	assert.Equal(t, 1, len(ret.Items))
 
 }
@@ -216,3 +231,63 @@ func TestBeforeActionHandle(t *testing.T) {
 // 	assert.NoError(t, err)
 // 	logrus.Print(ret)
 // }
+
+func TestDeleteHandle1(t *testing.T) {
+	r := router()
+	r.Use(Middleware).Use(MiddlewareTransParams).DELETE("/dog/:id", func(c *gin.Context) {
+		var ret []interface{}
+		config := Configuration{
+			DB:      gormDB,
+			Table:   "dogs",
+			Model:   &Dog{},
+			Results: ret,
+		}
+		c.Set("_lazy_configuration", &config)
+		return
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/dog", nil)
+
+	r.ServeHTTP(w, req)
+	response := Response{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Equal(t, 200, w.Code)
+	assert.NoError(t, err)
+
+}
+
+func TestDeleteHandle(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	context, _ := gin.CreateTestContext(httptest.NewRecorder())
+	type args struct {
+		c  *gin.Context
+		id string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantData []map[string]interface{}
+		wantErr  bool
+	}{
+		{"case-1", args{c: context, id: "1"}, nil, false},
+		{"case-2", args{c: context, id: "abc"}, nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.args.c.Params = []gin.Param{gin.Param{
+				Key:   `id`,
+				Value: tt.args.id,
+			}}
+
+			gotData, err := DeleteHandle(tt.args.c)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DeleteHandle() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !cmp.Equal(gotData, tt.wantData) {
+				t.Errorf("DeleteHandle() = %v, want %v\ndiff=%v", gotData, tt.wantData, cmp.Diff(gotData, tt.wantData))
+			}
+		})
+	}
+}

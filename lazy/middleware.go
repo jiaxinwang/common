@@ -33,7 +33,14 @@ func Middleware(c *gin.Context) {
 			if data, exist := c.Get(keyResults); exist {
 				c.Set("ret", map[string]interface{}{"data": data})
 			}
-		case http.MethodDelete:	
+		case http.MethodDelete:
+			if _, err := DeleteHandle(c); err != nil {
+				c.Set("error_msg", err.Error())
+				return
+			}
+			if data, exist := c.Get(keyResults); exist {
+				c.Set("ret", map[string]interface{}{"data": data})
+			}
 		}
 		return
 	}()

@@ -92,7 +92,7 @@ func setup() {
 		panic(err)
 	}
 
-	gormDB.AutoMigrate(&Dog{}, &Profile{}, &Breed{}, &Toy{}, &Food{})
+	gormDB.AutoMigrate(&Dog{}, &Profile{}, &Breed{}, &Toy{}, &Food{}, &Owner{})
 
 	ownerNames := []string{
 		`Bowie`,
