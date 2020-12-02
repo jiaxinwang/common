@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Copy ...
@@ -68,4 +71,24 @@ func Readlines(file string) (lines []string, err error) {
 		lines = append(lines, line)
 	}
 	return
+}
+
+// Save ...
+func Save(data []byte, fullpath string) (err error) {
+	dir := filepath.Dir(fullpath)
+	if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+		logrus.WithError(err).WithField("fullpath", fullpath).Error()
+		return
+	}
+	var f *os.File
+	if f, err = os.Create(fullpath); err != nil {
+		logrus.WithError(err).WithField("fullpath", fullpath).Error()
+		return
+	}
+	defer f.Close()
+	if _, err = f.Write(data); err != nil {
+		logrus.WithError(err).WithField("fullpath", fullpath).Error()
+		return
+	}
+	return nil
 }
