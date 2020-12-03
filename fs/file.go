@@ -63,12 +63,12 @@ func Readlines(file string) (lines []string, err error) {
 	var line string
 	for {
 		line, err = reader.ReadString('\n')
+		lines = append(lines, line)
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			break
 		}
-		lines = append(lines, line)
 	}
 	return
 }
