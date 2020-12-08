@@ -92,3 +92,13 @@ func Save(data []byte, fullpath string) (err error) {
 	}
 	return nil
 }
+
+// Stat ...
+func Stat(fullpath string) (info os.FileInfo, err error) {
+	if f, err := os.Open(fullpath); err != nil {
+		logrus.WithError(err).WithField("fullpath", fullpath).Error()
+		return nil, err
+	} else {
+		return f.Stat()
+	}
+}
