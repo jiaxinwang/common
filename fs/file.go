@@ -2,6 +2,7 @@ package fs
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -71,6 +72,29 @@ func Readlines(file string) (lines []string, err error) {
 		}
 	}
 	return
+}
+
+// ReadBytes ...
+func ReadBytes(file string) (bytes []byte, err error) {
+	fd, err := os.Open(file)
+	if err != nil {
+		return
+	}
+	defer fd.Close()
+
+	reader := bufio.NewReader(fd)
+	buf := make([]byte, 1024*1024*16)
+
+	for {
+		size, err := reader.Read(buf)
+		bytes = append(bytes, buf[:size]...)
+		if errors.Is(err, io.EOF) || (err == nil && size == 0) {
+			return bytes, nil
+		}
+		if err != nil {
+			return bytes, err
+		}
+	}
 }
 
 // Save ...
