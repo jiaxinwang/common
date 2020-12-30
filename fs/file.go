@@ -2,12 +2,15 @@ package fs
 
 import (
 	"bufio"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/sirupsen/logrus"
 )
 
@@ -125,4 +128,28 @@ func Stat(fullpath string) (info os.FileInfo, err error) {
 	} else {
 		return f.Stat()
 	}
+}
+
+// MIME ...
+func MIME(fullpath string) (string, error) {
+	mime, err := mimetype.DetectFile(fullpath)
+	if err != nil {
+		return ``, err
+	}
+	return mime.String(), err
+}
+
+// MD5 ...
+func MD5(fullpath string) (string, error) {
+	f, err := os.Open(fullpath)
+	if err != nil {
+		return ``, err
+	}
+	defer f.Close()
+	hash := md5.New()
+	if _, err := io.Copy(hash, f); err != nil {
+		return ``, err
+	}
+
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }

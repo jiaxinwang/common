@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/bregydoc/gtranslate v0.0.0-20200913051839-1bd07f6c1fc5
+	github.com/gabriel-vasile/mimetype v1.1.2
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/go-cmp v0.4.0
 	github.com/json-iterator/go v1.1.10
