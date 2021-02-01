@@ -7,6 +7,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.1.2
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/go-cmp v0.4.0
+	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/json-iterator/go v1.1.10
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac // indirect

@@ -2,3 +2,4 @@
 .DS_Store
 vendor
 *.db
+mail/mail_test.go
