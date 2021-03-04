@@ -1,6 +1,6 @@
 module github.com/jiaxinwang/common
 
-go 1.14
+go 1.16
 
 require (
 	github.com/bregydoc/gtranslate v0.0.0-20200913051839-1bd07f6c1fc5
