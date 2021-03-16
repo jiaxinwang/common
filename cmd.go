@@ -8,7 +8,12 @@ import (
 
 // Run ...
 func Run(name string, args ...string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	return RunWithTimeout(2*time.Minute, name, args...)
+}
+
+// RunWithTimeout ...
+func RunWithTimeout(duration time.Duration, name string, args ...string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), duration)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, name, args...)
