@@ -2,6 +2,7 @@ package swc
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"strconv"
 
@@ -31,8 +32,13 @@ func (swc SeaweedClient) Assign(count int) (AssignResp, error) {
 	ro := &grequests.RequestOptions{
 		Params: map[string]string{"count": strconv.Itoa(count)},
 	}
-
-	resp, err := grequests.Get(swc.Master, ro)
+	u, err := url.Parse(swc.Master)
+	if err != nil {
+		logrus.WithError(err).Error()
+		return ret, err
+	}
+	u.Path = path.Join("dir", "assign")
+	resp, err := grequests.Get(u.String(), ro)
 	if err != nil {
 		logrus.WithError(err).Error()
 		return ret, err
@@ -50,7 +56,7 @@ func (swc SeaweedClient) Upload(volume, fid string, filename string) (publicURL,
 		return ``, ``, uint64(0), err
 	}
 
-	uploadURL := fmt.Sprintf(`%s%s`, volume, fid)
+	uploadURL := fmt.Sprintf(`http://%s/%s`, volume, fid)
 	ro := &grequests.RequestOptions{
 		Files: fd,
 	}
@@ -60,6 +66,8 @@ func (swc SeaweedClient) Upload(volume, fid string, filename string) (publicURL,
 		return ``, ``, uint64(0), err
 	}
 	defer resp.Close()
+
+	logrus.Warn("resp: ", resp.String())
 	jsoniter.UnmarshalFromString(resp.String(), &ret)
 
 	return volume, fid, ret.Size, nil
