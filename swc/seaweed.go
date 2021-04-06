@@ -60,16 +60,14 @@ func (swc SeaweedClient) Upload(volume, fid string, filename string) (publicURL,
 	ro := &grequests.RequestOptions{
 		Files: fd,
 	}
-	resp, err := grequests.Get(uploadURL, ro)
+	resp, err := grequests.Post(uploadURL, ro)
 	if err != nil {
 		logrus.WithError(err).Error()
 		return ``, ``, uint64(0), err
 	}
 	defer resp.Close()
 
-	logrus.Warn("resp: ", resp.String())
 	jsoniter.UnmarshalFromString(resp.String(), &ret)
-
 	return volume, fid, ret.Size, nil
 }
 
@@ -105,5 +103,6 @@ func (swc SeaweedClient) UploadSimplely(filename string) (publicURL, fid string,
 		logrus.WithError(err).Error()
 		return ``, ``, uint64(0), err
 	}
+	logrus.WithField("fid", assign.Fid).WithField("Publicurl", assign.Publicurl).Info()
 	return swc.Upload(assign.Publicurl, assign.Fid, filename)
 }
