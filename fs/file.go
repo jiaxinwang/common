@@ -8,11 +8,30 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/sirupsen/logrus"
 )
+
+func SafeCopy(src, dst string) (err error) {
+	dest := dst
+	num := 0
+	for {
+		if FileExist(dest) {
+			num++
+			dest = fmt.Sprintf("%s/%s(%d)%s", path.Dir(dst), strings.TrimSuffix(filepath.Base(dst), path.Ext(dst)), num, path.Ext(dst))
+			logrus.Info(dest)
+		} else {
+			logrus.Info("here ", dest)
+			break
+		}
+	}
+
+	return Copy(src, dest)
+}
 
 // Copy ...
 func Copy(src, dst string) error {
